@@ -3,11 +3,10 @@ package building;
 import java.util.LinkedList;
 
 public class Building {
-    private LinkedList<Floor> floors;
+    private LinkedList<Floor> floors = new LinkedList<>();;
 
     public Building(int numberOfFloors) {
 
-        floors = new LinkedList<>();
         for (int i = 0; i < numberOfFloors; i++) {
             floors.add(new Floor(i + 1));
         }
