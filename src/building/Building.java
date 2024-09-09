@@ -3,7 +3,7 @@ package building;
 import java.util.LinkedList;
 
 public class Building {
-    private LinkedList<Floor> floors = new LinkedList<>();;
+    public final LinkedList<Floor> floors = new LinkedList<>();
 
     public Building(int numberOfFloors) {
 

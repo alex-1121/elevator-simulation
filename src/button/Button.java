@@ -10,4 +10,8 @@ public class Button {
     public void release() {
         isPressed = false;
     }
+
+    public boolean isPressed() {
+        return isPressed;
+    }
 }

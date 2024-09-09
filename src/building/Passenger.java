@@ -1,8 +1,7 @@
 package building;
 
 public class Passenger {
-    private final int destinationFloorNumber;
-    // TODO track waiting time
+    public final int destinationFloorNumber;
 
     public Passenger(int destinationFloorNumber) {
         this.destinationFloorNumber = destinationFloorNumber;
