@@ -10,12 +10,6 @@ public class Main {
     private static final CustomLogger logger = new CustomLogger();
 
     public static void main(String[] args) {
-        new Main().run();
-    }
-
-    public void run() {
-        logger.logMain("Main thread started");
-
         int numberOfFloors = 5;
         int elevatorCapacity = 6;
 
@@ -33,8 +27,10 @@ public class Main {
         secondFloor.button.press();
         fifthFloor.button.press();
 
-        for (int i = 0; i < 3; i++) {
-            ecs.handleElevatorCalls();
-        }
+        Thread ecsRunnable = new Thread(ecs);
+        Thread elevatorRunnable = new Thread(elevator);
+
+        ecsRunnable.start();
+        elevatorRunnable.start();
     }
 }
