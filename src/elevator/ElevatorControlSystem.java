@@ -2,14 +2,19 @@ package elevator;
 
 import building.Building;
 import building.Floor;
+import customLogger.CustomLogger;
 
 import java.util.LinkedList;
 
 public class ElevatorControlSystem {
+
+    private final CustomLogger logger;
+    
     private final Elevator elevator;
     private final Building building;
 
-    public ElevatorControlSystem(Elevator elevator, Building building) {
+    public ElevatorControlSystem(Elevator elevator, Building building, CustomLogger logger) {
+        this.logger = logger;
         this.elevator = elevator;
         this.building = building;
     }
@@ -18,7 +23,7 @@ public class ElevatorControlSystem {
         LinkedList<Floor> destinationFloors = new LinkedList<>();
         detectPressedButtons(destinationFloors);
         if (destinationFloors.isEmpty()) {
-            System.out.println("Elevator idling");
+            logger.logECS("Elevator idling");
             return;
         }
         moveToDestinationFloors(destinationFloors);
@@ -33,14 +38,14 @@ public class ElevatorControlSystem {
         elevator.elevatorButtons.stream().filter(ElevatorButton::isPressed).forEach(pressedElevatorButton -> {
             Floor matchingFloor = findMatchingFloor(pressedElevatorButton.floorNumber);
             destinationFloors.push(matchingFloor);
-            System.out.println("pressed elevator button detected " + pressedElevatorButton.floorNumber);
+            logger.logECS("pressed elevator button detected " + pressedElevatorButton.floorNumber);
         });
     }
 
     private void detectPressedFloorButtons(LinkedList<Floor> destinationFloors) {
         building.floors.stream().filter(floor -> floor.button.isPressed()).forEach(floor -> {
             destinationFloors.push(floor);
-            System.out.println("pressed floor button detected on floor " + floor.floorNumber);
+            logger.logECS("pressed floor button detected on floor " + floor.floorNumber);
         });
     }
 

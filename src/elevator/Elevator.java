@@ -4,10 +4,14 @@ import building.Building;
 import building.Floor;
 import building.Passenger;
 import button.Button;
+import customLogger.CustomLogger;
 
 import java.util.ArrayList;
 
 public class Elevator {
+    
+    private final CustomLogger logger;
+    
     public final int capacity;
     public final ArrayList<ElevatorButton> elevatorButtons = new ArrayList<>();
 
@@ -16,14 +20,15 @@ public class Elevator {
     public ArrayList<Passenger> passengers = new ArrayList<>();
     private final Building building;
 
-    public Elevator(int capacity, Building building, int currentFloorNumber) {
+    public Elevator(int capacity, Building building, int currentFloorNumber, CustomLogger logger) {
+        this.logger = logger;
         this.capacity = capacity;
         this.currentFloorNumber = currentFloorNumber;
         this.destinationFloor = currentFloorNumber;
         this.building = building;
         initializeElevatorButtons();
 
-        System.out.println("starting at floor: " + currentFloorNumber);
+        logger.logElevator("starting at floor: " + currentFloorNumber);
     }
 
     private void initializeElevatorButtons() {
@@ -32,18 +37,18 @@ public class Elevator {
 
     public void goToFloor(int floorNumber) {
         destinationFloor = floorNumber;
-        System.out.println("destination floor: " + destinationFloor);
+        logger.logElevator("destination floor: " + destinationFloor);
         while (!atDestination()) {
             if (currentFloorNumber < destinationFloor) {
                 currentFloorNumber++;
-                System.out.println("moving up");
+                logger.logElevator("moving up");
             } else {
                 currentFloorNumber--;
-                System.out.println("moving down");
+                logger.logElevator("moving down");
             }
         }
         releaseButton();
-        System.out.println("elevator arrived at floor " + currentFloorNumber);
+        logger.logElevator("elevator arrived at floor " + currentFloorNumber);
     }
 
     private void releaseButton() {
@@ -71,7 +76,7 @@ public class Elevator {
         if (passengersToUnload.isEmpty()) {
             return;
         }
-        System.out.println(passengersToUnload.size() + " passengers arrived at their destination floor");
+        logger.logElevator(passengersToUnload.size() + " passengers arrived at their destination floor");
         passengers.removeAll(passengersToUnload);
     }
 
@@ -85,7 +90,7 @@ public class Elevator {
 
             pressElevatorButton(passenger.destinationFloorNumber);
         }
-        System.out.println("new passengers: " + newPassengers + ", total passengers: " + this.passengers.size() + "/" + capacity);
+        logger.logElevator("new passengers: " + newPassengers + ", total passengers: " + this.passengers.size() + "/" + capacity);
     }
 
     private void pressElevatorButton(int destinationFloorNumber) {
