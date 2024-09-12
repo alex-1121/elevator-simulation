@@ -12,6 +12,10 @@ public class Building {
         }
     }
 
+    public Floor getFloorByNumber(int floorNumber) {
+        return floors.stream().filter(f -> f.floorNumber == floorNumber).findFirst().orElse(null);
+    }
+
     public LinkedList<Floor> getFloors() {
         return floors;
     }

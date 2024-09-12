@@ -77,7 +77,7 @@ public class Elevator implements Runnable {
     }
 
     private void loadAndUnloadPassengers() {
-        Floor currentFloor = this.building.floors.get(this.currentFloorNumber - 1);
+        Floor currentFloor = this.building.getFloorByNumber(this.currentFloorNumber);
         unloadPassengers(currentFloor);
         loadPassengers(currentFloor);
     }

@@ -20,8 +20,9 @@ public class Main {
         Passenger passenger1 = new Passenger(1);
         Passenger passenger2 = new Passenger(1);
 
-        Floor secondFloor = building.getFloors().get(1);
-        Floor fifthFloor = building.getFloors().get(4);
+        Floor secondFloor = building.getFloorByNumber(2);
+        Floor fifthFloor = building.getFloorByNumber(5);
+
         secondFloor.addWaitingPassenger(passenger1);
         fifthFloor.addWaitingPassenger(passenger2);
         secondFloor.button.press();
