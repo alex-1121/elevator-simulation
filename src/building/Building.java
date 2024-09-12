@@ -1,9 +1,11 @@
 package building;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 
 public class Building {
-    public final LinkedList<Floor> floors = new LinkedList<>();
+    private final Collection<Floor> floors = Collections.synchronizedCollection(new LinkedList<>());
 
     public Building(int numberOfFloors) {
 
@@ -16,7 +18,7 @@ public class Building {
         return floors.stream().filter(f -> f.floorNumber == floorNumber).findFirst().orElse(null);
     }
 
-    public LinkedList<Floor> getFloors() {
+    public Collection<Floor> getFloors() {
         return floors;
     }
 }

@@ -61,7 +61,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void detectPressedFloorButtons() {
-        building.floors.stream().filter(floor -> floor.button.isPressed()).forEach(floor -> {
+        building.getFloors().stream().filter(floor -> floor.button.isPressed()).forEach(floor -> {
             if (!destinationFloors.contains(floor)) {
                 destinationFloors.push(floor);
                 logger.logECS("Pressed floor button detected on floor " + floor.floorNumber);
@@ -75,7 +75,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private Floor findMatchingFloor(int floorNumber) {
-        return building.floors.stream().
+        return building.getFloors().stream().
                 filter(floor -> floor.floorNumber == floorNumber)
                 .findFirst().orElseThrow();
     }

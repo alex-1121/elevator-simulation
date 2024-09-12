@@ -8,6 +8,8 @@ import building.Passenger;
 import button.Button;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class Elevator implements Runnable {
 
@@ -21,7 +23,7 @@ public class Elevator implements Runnable {
     private final ArrayList<Passenger> passengers = new ArrayList<>();
     private static final int TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
-    private final ArrayList<ElevatorButton> elevatorButtons = new ArrayList<>();
+    private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
     private boolean isMoving = false;
     private int currentFloorNumber;
     private int destinationFloorNumber;
@@ -33,7 +35,9 @@ public class Elevator implements Runnable {
         this.capacity = capacity;
         this.currentFloorNumber = currentFloorNumber;
         this.destinationFloorNumber = currentFloorNumber;
-        building.getFloors().forEach(floor -> elevatorButtons.add(new ElevatorButton(floor.floorNumber)));
+        synchronized (elevatorButtons) {
+            building.getFloors().forEach(floor -> elevatorButtons.add(new ElevatorButton(floor.floorNumber)));
+        }
 
         logger.logElevator("Starting at floor " + currentFloorNumber + "/" + building.getFloors().size());
     }
@@ -62,18 +66,21 @@ public class Elevator implements Runnable {
     }
 
     private void releaseButtons() {
-        elevatorButtons.stream()
-                .filter(button -> button.floorNumber == currentFloorNumber)
-                .findFirst()
-                .ifPresent(Button::release);
-
-        building.getFloors().stream()
-                .filter(floor -> floor.floorNumber == currentFloorNumber)
-                .findFirst()
-                .ifPresent(floor -> {
-                    floor.button.release();
-                    logger.logElevator("Released floor button on floor " + floor.floorNumber);
-                });
+        synchronized (elevatorButtons) {
+            elevatorButtons.stream()
+                    .filter(button -> button.floorNumber == currentFloorNumber)
+                    .findFirst()
+                    .ifPresent(Button::release);
+        }
+        synchronized (building.getFloors()) {
+            building.getFloors().stream()
+                    .filter(floor -> floor.floorNumber == currentFloorNumber && floor.button.isPressed())
+                    .findFirst()
+                    .ifPresent(floor -> {
+                        floor.button.release();
+                        logger.logElevator("Released floor button on floor " + floor.floorNumber);
+                    });
+        }
     }
 
     private void loadAndUnloadPassengers() {
@@ -95,14 +102,20 @@ public class Elevator implements Runnable {
     }
 
     private void loadPassengers(Floor currentFloor) {
-        ArrayList<Passenger> waitingPassengers = currentFloor.getWaitingPassengers();
         int newPassengers = 0;
-        while (!waitingPassengers.isEmpty() && this.passengers.size() < this.capacity) {
-            Passenger passenger = waitingPassengers.removeFirst();
-            this.passengers.add(passenger);
-            newPassengers++;
-
-            pressElevatorButton(passenger.destinationFloorNumber);
+        synchronized (currentFloor.getWaitingPassengers()) {
+            Collection<Passenger> waitingPassengers = currentFloor.getWaitingPassengers();
+            ArrayList<Passenger> passengersToLoad = new ArrayList<>();
+            for (Passenger passenger : waitingPassengers) {
+                if (this.passengers.size() >= this.capacity) {
+                    break;
+                }
+                passengersToLoad.add(passenger);
+                newPassengers++;
+                pressElevatorButton(passenger.destinationFloorNumber);
+            }
+            waitingPassengers.removeAll(passengersToLoad);
+            this.passengers.addAll(passengersToLoad);
         }
         logger.logElevator("New passengers: " + newPassengers + ", total passengers: " + this.passengers.size() + "/" + capacity);
     }
@@ -125,7 +138,7 @@ public class Elevator implements Runnable {
         return currentFloorNumber == destinationFloorNumber;
     }
 
-    public synchronized ArrayList<ElevatorButton> getElevatorButtons() {
+    public synchronized Collection<ElevatorButton> getElevatorButtons() {
         return this.elevatorButtons;
     }
 
