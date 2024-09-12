@@ -2,7 +2,7 @@ package elevator;
 
 import customLogger.CustomLogger;
 import building.Building;
-import building.Direction;
+import direction.Direction;
 import building.Floor;
 import building.Passenger;
 import button.Button;
