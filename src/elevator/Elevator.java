@@ -19,7 +19,7 @@ public class Elevator implements Runnable {
     private final Building building;
     private final int capacity;
     private final ArrayList<Passenger> passengers = new ArrayList<>();
-    private static final int MOVEMENT_BETWEEN_FLOORS = 500;
+    private static final int TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
     private final ArrayList<ElevatorButton> elevatorButtons = new ArrayList<>();
     private boolean isMoving = false;
@@ -115,7 +115,7 @@ public class Elevator implements Runnable {
 
     private void simulateElevatorMovingTime() {
         try {
-            Thread.sleep(MOVEMENT_BETWEEN_FLOORS);
+            Thread.sleep(TIME_TO_MOVE_BETWEEN_FLOORS);
         } catch (InterruptedException e) {
             logger.logError(e);
         }
