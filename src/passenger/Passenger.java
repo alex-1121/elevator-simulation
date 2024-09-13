@@ -1,4 +1,4 @@
-package building;
+package passenger;
 
 public class Passenger {
     public final int destinationFloorNumber;

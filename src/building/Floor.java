@@ -1,6 +1,6 @@
 package building;
 
-import button.Button;
+import passenger.Passenger;
 
 import java.util.ArrayList;
 import java.util.Collection;

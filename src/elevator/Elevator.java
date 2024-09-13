@@ -4,7 +4,7 @@ import customLogger.CustomLogger;
 import building.Building;
 import direction.Direction;
 import building.Floor;
-import building.Passenger;
+import passenger.Passenger;
 import button.Button;
 
 import java.util.*;
