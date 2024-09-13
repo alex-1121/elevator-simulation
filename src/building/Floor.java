@@ -8,7 +8,7 @@ import java.util.Collections;
 
 public class Floor {
     public final int floorNumber;
-    public Button button = new Button();
+    private final Button button = new Button();
     private final Collection<Passenger> waitingPassengers = Collections.synchronizedCollection(new ArrayList<>());
 
     public Floor(int floorNumber) {
@@ -21,5 +21,9 @@ public class Floor {
 
     public void addWaitingPassenger(Passenger passenger) {
         this.waitingPassengers.add(passenger);
+    }
+
+    public Button getButton() {
+        return button;
     }
 }

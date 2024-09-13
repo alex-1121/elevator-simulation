@@ -25,8 +25,8 @@ public class Main {
 
         secondFloor.addWaitingPassenger(passenger1);
         fifthFloor.addWaitingPassenger(passenger2);
-        secondFloor.button.press();
-        fifthFloor.button.press();
+        secondFloor.getButton().press();
+        fifthFloor.getButton().press();
 
         Thread ecsRunnable = new Thread(ecs);
         Thread elevatorRunnable = new Thread(elevator);

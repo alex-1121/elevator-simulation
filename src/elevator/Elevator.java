@@ -7,9 +7,7 @@ import building.Floor;
 import building.Passenger;
 import button.Button;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 public class Elevator implements Runnable {
 
@@ -24,9 +22,10 @@ public class Elevator implements Runnable {
     private static final int TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
+    private final SortedSet<Integer> destinationFloorNumbers = Collections.synchronizedSortedSet(new TreeSet<>());
+    private int destinationFloorNumber;
     private boolean isMoving = false;
     private int currentFloorNumber;
-    private int destinationFloorNumber;
     private Direction movementDirection;
 
     public Elevator(int capacity, Building building, int currentFloorNumber, CustomLogger logger) {
@@ -43,19 +42,31 @@ public class Elevator implements Runnable {
     }
 
     private void goToDestinationFloor() {
+        synchronized (destinationFloorNumbers) {
+            if (this.destinationFloorNumbers.isEmpty()) {
+                return;
+            }
+            this.destinationFloorNumber = destinationFloorNumbers.getLast();
+        }
+        logger.logElevator("Destination floors " + destinationFloorNumbers);
+
         logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
         while (!atDestination()) {
             isMoving = true;
             makeStep();
         }
+        logger.logElevator("Arrived at destination floor: " + this.destinationFloorNumber);
         isMoving = false;
+        synchronized (destinationFloorNumbers) {
+            destinationFloorNumbers.remove(currentFloorNumber);
+        }
         releaseButtons();
         loadAndUnloadPassengers();
     }
 
     private void makeStep() {
         simulateElevatorMovingTime();
-        if (currentFloorNumber < destinationFloorNumber) {
+        if (currentFloorNumber < this.destinationFloorNumber) {
             currentFloorNumber++;
             movementDirection = Direction.UP;
         } else {
@@ -74,12 +85,9 @@ public class Elevator implements Runnable {
         }
         synchronized (building.getFloors()) {
             building.getFloors().stream()
-                    .filter(floor -> floor.floorNumber == currentFloorNumber && floor.button.isPressed())
+                    .filter(floor -> floor.floorNumber == currentFloorNumber)
                     .findFirst()
-                    .ifPresent(floor -> {
-                        floor.button.release();
-                        logger.logElevator("Released floor button on floor " + floor.floorNumber);
-                    });
+                    .ifPresent(floor -> floor.getButton().release());
         }
     }
 
@@ -121,9 +129,11 @@ public class Elevator implements Runnable {
     }
 
     private void pressElevatorButton(int destinationFloorNumber) {
-        elevatorButtons.stream()
-                .filter(button -> button.floorNumber == destinationFloorNumber)
-                .findFirst().ifPresent(Button::press);
+        synchronized (elevatorButtons) {
+            elevatorButtons.stream()
+                    .filter(button -> button.floorNumber == destinationFloorNumber)
+                    .findFirst().ifPresent(Button::press);
+        }
     }
 
     private void simulateElevatorMovingTime() {
@@ -154,13 +164,13 @@ public class Elevator implements Runnable {
         return destinationFloorNumber;
     }
 
-    public void setDestinationFloorNumber(int destinationFloorNumber) {
-        this.destinationFloorNumber = destinationFloorNumber;
+    public void addDestinations(LinkedList<Integer> newDestinations) {
+        this.destinationFloorNumbers.addAll(newDestinations);
     }
 
 
     private void waitIfNeeded() {
-        while (atDestination()) {
+        while (destinationFloorNumbers.isEmpty()) {
             synchronized (lock) {
                 try {
                     logger.logElevator("Waiting for calls");

@@ -24,23 +24,19 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void handleElevatorCalls() {
-        if (elevator.atDestination()) {
-            destinationFloors.stream()
-                    .filter(floor -> floor.floorNumber == elevator.getCurrentFloorNumber())
-                    .findFirst().ifPresent(destinationFloors::remove);
-        }
         detectPressedButtons();
 
         if (destinationFloors.isEmpty()) {
             return;
         }
 
-        // TODO make it possible to interrupt moving elevator
-        if (elevator.isMoving()) {
-            return;
-        }
+        // TODO refactor
+        LinkedList<Integer> destinationFloorNumbers = destinationFloors.stream()
+                .map(floor -> floor.floorNumber)
+                .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
 
-        setNewDestination(destinationFloors);
+        destinationFloors.clear();
+        sendNewDestinations(destinationFloorNumbers);
     }
 
     private void detectPressedButtons() {
@@ -49,28 +45,29 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void detectPressedElevatorButtons() {
-        elevator.getElevatorButtons().stream()
-                .filter(ElevatorButton::isPressed)
-                .forEach(pressedElevatorButton -> {
-                    Floor matchingFloor = findMatchingFloor(pressedElevatorButton.floorNumber);
-                    if (!destinationFloors.contains(matchingFloor)) {
-                        destinationFloors.push(matchingFloor);
-                        logger.logECS("Pressed elevator button detected " + pressedElevatorButton.floorNumber);
-                    }
-                });
+        synchronized (elevator.getElevatorButtons()) {
+            elevator.getElevatorButtons().stream().filter(ElevatorButton::isPressed).forEach(pressedButton -> {
+                Floor matchingFloor = findMatchingFloor(pressedButton.floorNumber);
+                if (!destinationFloors.contains(matchingFloor)) {
+                    destinationFloors.push(matchingFloor);
+                }
+            });
+        }
     }
 
     private void detectPressedFloorButtons() {
-        building.getFloors().stream().filter(floor -> floor.button.isPressed()).forEach(floor -> {
-            if (!destinationFloors.contains(floor)) {
-                destinationFloors.push(floor);
-                logger.logECS("Pressed floor button detected on floor " + floor.floorNumber);
-            }
-        });
+        synchronized (building.getFloors()) {
+            building.getFloors().stream().filter(floor -> floor.getButton().isPressed()).forEach(floor -> {
+                if (!destinationFloors.contains(floor)) {
+                    destinationFloors.push(floor);
+                }
+            });
+        }
     }
 
-    private void setNewDestination(LinkedList<Floor> destinationFloors) {
-        elevator.setDestinationFloorNumber(destinationFloors.getFirst().floorNumber);
+    private void sendNewDestinations(LinkedList<Integer> newDestinations) {
+        logger.logECS("Sending new destinations: " + newDestinations.toString());
+        elevator.addDestinations(newDestinations);
         elevator.wakeUp();
     }
 
