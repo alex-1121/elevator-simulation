@@ -32,7 +32,7 @@ public class ElevatorControlSystem implements Runnable {
             return;
         }
 
-        sendNewDestinations(destinationFloorNumbers);
+        sendDestinations();
     }
 
     private void detectPressedButtons() {
@@ -57,9 +57,9 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private void sendNewDestinations(Set<Integer> newDestinations) {
-        logger.logECS("Sending new destinations: " + newDestinations.toString());
-        elevator.addDestinations(newDestinations);
+    private void sendDestinations() {
+        logger.logECS("Sending destinations: " + destinationFloorNumbers);
+        elevator.addDestinations(destinationFloorNumbers);
         destinationFloorNumbers.clear();
         elevator.wakeUp();
     }
