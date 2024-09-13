@@ -164,7 +164,7 @@ public class Elevator implements Runnable {
         return destinationFloorNumber;
     }
 
-    public void addDestinations(LinkedList<Integer> newDestinations) {
+    public void addDestinations(Set<Integer> newDestinations) {
         this.destinationFloorNumbers.addAll(newDestinations);
     }
 

@@ -1,10 +1,12 @@
 package elevator;
 
+import building.FloorButton;
 import customLogger.CustomLogger;
 import building.Building;
 import building.Floor;
 
-import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ElevatorControlSystem implements Runnable {
 
@@ -15,7 +17,7 @@ public class ElevatorControlSystem implements Runnable {
 
     private final Elevator elevator;
     private final Building building;
-    private final LinkedList<Floor> destinationFloors = new LinkedList<>();
+    private final Set<Integer> destinationFloorNumbers = new TreeSet<>();
 
     public ElevatorControlSystem(Elevator elevator, Building building, CustomLogger logger) {
         this.logger = logger;
@@ -26,16 +28,10 @@ public class ElevatorControlSystem implements Runnable {
     private void handleElevatorCalls() {
         detectPressedButtons();
 
-        if (destinationFloors.isEmpty()) {
+        if (destinationFloorNumbers.isEmpty()) {
             return;
         }
 
-        // TODO refactor
-        LinkedList<Integer> destinationFloorNumbers = destinationFloors.stream()
-                .map(floor -> floor.floorNumber)
-                .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
-
-        destinationFloors.clear();
         sendNewDestinations(destinationFloorNumbers);
     }
 
@@ -46,28 +42,25 @@ public class ElevatorControlSystem implements Runnable {
 
     private void detectPressedElevatorButtons() {
         synchronized (elevator.getElevatorButtons()) {
-            elevator.getElevatorButtons().stream().filter(ElevatorButton::isPressed).forEach(pressedButton -> {
-                Floor matchingFloor = findMatchingFloor(pressedButton.floorNumber);
-                if (!destinationFloors.contains(matchingFloor)) {
-                    destinationFloors.push(matchingFloor);
-                }
-            });
+            elevator.getElevatorButtons().stream()
+                    .filter(ElevatorButton::isPressed)
+                    .forEach(pressedButton -> destinationFloorNumbers.add(pressedButton.floorNumber));
         }
     }
 
     private void detectPressedFloorButtons() {
         synchronized (building.getFloors()) {
-            building.getFloors().stream().filter(floor -> floor.getButton().isPressed()).forEach(floor -> {
-                if (!destinationFloors.contains(floor)) {
-                    destinationFloors.push(floor);
-                }
-            });
+            building.getFloors().stream()
+                    .map(Floor::getButton)
+                    .filter(FloorButton::isPressed)
+                    .forEach(pressedButton -> destinationFloorNumbers.add(pressedButton.floorNumber));
         }
     }
 
-    private void sendNewDestinations(LinkedList<Integer> newDestinations) {
+    private void sendNewDestinations(Set<Integer> newDestinations) {
         logger.logECS("Sending new destinations: " + newDestinations.toString());
         elevator.addDestinations(newDestinations);
+        destinationFloorNumbers.clear();
         elevator.wakeUp();
     }
 
