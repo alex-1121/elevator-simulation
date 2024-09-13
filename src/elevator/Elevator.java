@@ -111,8 +111,8 @@ public class Elevator implements Runnable {
 
     private void loadPassengers(Floor currentFloor) {
         int newPassengers = 0;
-        synchronized (currentFloor.getWaitingPassengers()) {
-            Collection<Passenger> waitingPassengers = currentFloor.getWaitingPassengers();
+        Collection<Passenger> waitingPassengers = currentFloor.getWaitingPassengers();
+        synchronized (waitingPassengers) {
             ArrayList<Passenger> passengersToLoad = new ArrayList<>();
             for (Passenger passenger : waitingPassengers) {
                 if (this.passengers.size() + passengersToLoad.size() >= this.capacity) {
