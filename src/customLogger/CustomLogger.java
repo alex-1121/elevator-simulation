@@ -11,6 +11,7 @@ public class CustomLogger {
     private static final String ANSI_IDEA_WHITE = "\033[38;2;188;190;196m";
     private static final String ANSI_PINK = "\033[38;5;97m";
     private static final String ANSI_GREEN = "\033[38;5;29m";
+    private static final String ANSI_BLUE = "\033[38;5;6m";
     private static final String ANSI_RESET = "\033[0m";
 
     public CustomLogger() {
@@ -18,15 +19,19 @@ public class CustomLogger {
     }
 
     public void logMain(String message) {
-        logWithColor("Main:     ", message, ANSI_IDEA_WHITE);
+        logWithColor("Main:      ", message, ANSI_IDEA_WHITE);
     }
 
     public void logElevator(String message) {
-        logWithColor("Elevator: ", message, ANSI_PINK);
+        logWithColor("Elevator:  ", message, ANSI_PINK);
     }
 
     public void logECS(String message) {
-        logWithColor("ECS:      ", message, ANSI_GREEN);
+        logWithColor("ECS:       ", message, ANSI_GREEN);
+    }
+
+    public void logPassengers(String message) {
+        logWithColor("Passenger: ", message, ANSI_BLUE);
     }
 
     public void logError(InterruptedException e) {

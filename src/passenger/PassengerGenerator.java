@@ -53,7 +53,7 @@ public class PassengerGenerator implements Runnable {
             floor.addWaitingPassenger(passenger);
             floor.getButton().press();
         }
-        // logger.logMain("Generated passenger at floor " + floorNumber + ", dest: " + destinationFloorNumber);
+        // logger.logPassengers("Generated passenger at floor " + floorNumber + ", dest: " + destinationFloorNumber);
     }
 
     private void executeGenerationInterval() {
