@@ -41,12 +41,24 @@ public class Elevator implements Runnable {
         logger.logElevator("Starting at floor " + currentFloorNumber + "/" + building.getFloors().size());
     }
 
+    private Integer findNextDestination() {
+        if (movementDirection == null) {
+            return destinationFloorNumbers.getLast();
+        }
+        if (movementDirection == Direction.DOWN) {
+            return destinationFloorNumbers.stream()
+                    .filter(floorNumber -> floorNumber < currentFloorNumber)
+                    .findFirst().orElse(destinationFloorNumbers.getLast());
+        }
+        return destinationFloorNumbers.getLast();
+    }
+
     private void goToDestinationFloor() {
         synchronized (destinationFloorNumbers) {
             if (this.destinationFloorNumbers.isEmpty()) {
                 return;
             }
-            this.destinationFloorNumber = destinationFloorNumbers.getLast();
+            this.destinationFloorNumber = findNextDestination();
         }
         logger.logElevator("Destination floors " + destinationFloorNumbers);
 
