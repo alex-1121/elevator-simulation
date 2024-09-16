@@ -19,19 +19,19 @@ public class CustomLogger {
     }
 
     public void logMain(String message) {
-        logWithColor("Main:      ", message, ANSI_IDEA_WHITE);
+        logWithColor("Main      | ", message, ANSI_IDEA_WHITE);
     }
 
     public void logElevator(String message) {
-        logWithColor("Elevator:  ", message, ANSI_PINK);
+        logWithColor("Elevator  | ", message, ANSI_PINK);
     }
 
     public void logECS(String message) {
-        logWithColor("ECS:       ", message, ANSI_GREEN);
+        logWithColor("ECS       | ", message, ANSI_GREEN);
     }
 
     public void logPassengers(String message) {
-        logWithColor("Passenger: ", message, ANSI_BLUE);
+        logWithColor("Passenger | ", message, ANSI_BLUE);
     }
 
     public void logError(InterruptedException e) {
