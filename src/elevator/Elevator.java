@@ -39,33 +39,20 @@ public class Elevator implements Runnable {
         }
     }
 
-    private Integer findNextDestination() {
-        if (movementDirection == null) {
-            return destinationFloorNumbers.getLast();
-        }
-        if (movementDirection == Direction.DOWN) {
-            return destinationFloorNumbers.stream()
-                    .filter(floorNumber -> floorNumber < currentFloorNumber)
-                    .findFirst().orElse(destinationFloorNumbers.getLast());
-        }
-        return destinationFloorNumbers.getLast();
-    }
-
     private void goToDestinationFloor() {
         synchronized (destinationFloorNumbers) {
             if (this.destinationFloorNumbers.isEmpty()) {
                 return;
             }
-            this.destinationFloorNumber = findNextDestination();
+            this.destinationFloorNumber = destinationFloorNumbers.first();
         }
-        logger.logElevator("Destination floors " + destinationFloorNumbers);
 
+        logger.logPassengers("Passengers: " + passengers);
         logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
         while (!atDestination()) {
             isMoving = true;
             makeStep();
         }
-        logger.logElevator("Arrived at destination floor: " + this.destinationFloorNumber);
         isMoving = false;
         synchronized (destinationFloorNumbers) {
             destinationFloorNumbers.remove(currentFloorNumber);
@@ -89,7 +76,7 @@ public class Elevator implements Runnable {
     private void releaseButtons() {
         synchronized (elevatorButtons) {
             elevatorButtons.stream()
-                    .filter(button -> button.floorNumber == currentFloorNumber)
+                    .filter(button -> button.getFloorNumber() == currentFloorNumber)
                     .findFirst()
                     .ifPresent(Button::release);
         }
@@ -141,7 +128,7 @@ public class Elevator implements Runnable {
     private void pressElevatorButton(int destinationFloorNumber) {
         synchronized (elevatorButtons) {
             elevatorButtons.stream()
-                    .filter(button -> button.floorNumber == destinationFloorNumber)
+                    .filter(button -> button.getFloorNumber() == destinationFloorNumber)
                     .findFirst().ifPresent(Button::press);
         }
     }
@@ -170,12 +157,16 @@ public class Elevator implements Runnable {
         return currentFloorNumber;
     }
 
-    public int getDestinationFloorNumber() {
-        return destinationFloorNumber;
-    }
-
     public void addDestinations(Set<Integer> newDestinations) {
         this.destinationFloorNumbers.addAll(newDestinations);
+    }
+
+    public void setMovementDirection(Direction movementDirection) {
+        this.movementDirection = movementDirection;
+    }
+
+    public Direction getMovementDirection() {
+        return this.movementDirection;
     }
 
 

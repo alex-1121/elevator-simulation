@@ -24,12 +24,12 @@ public class PassengerGenerator implements Runnable {
 
     @Override
     public void run() {
-        logger.logMain("Started");
+        logger.logPassengers("Started");
         while (shouldRun) {
             generateResidentialPassenger();
             executeGenerationInterval();
         }
-        logger.logMain("Stopped");
+        logger.logPassengers("Stopped");
     }
 
     private int getRandomFloorNumberExcept(Integer floorNumberToExclude) {

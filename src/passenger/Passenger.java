@@ -6,4 +6,9 @@ public class Passenger {
     public Passenger(int destinationFloorNumber) {
         this.destinationFloorNumber = destinationFloorNumber;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(destinationFloorNumber);
+    }
 }

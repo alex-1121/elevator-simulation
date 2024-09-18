@@ -1,12 +1,14 @@
 package elevator;
 
 import building.FloorButton;
+import button.Button;
 import customLogger.CustomLogger;
 import building.Building;
 import building.Floor;
+import direction.Direction;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ElevatorControlSystem implements Runnable {
 
@@ -17,7 +19,10 @@ public class ElevatorControlSystem implements Runnable {
 
     private final Elevator elevator;
     private final Building building;
+
     private final Set<Integer> destinationFloorNumbers = new TreeSet<>();
+    private final Set<FloorButton> pressedFloorButtons = new TreeSet<>(Button.buttonComparator);
+    private final Set<ElevatorButton> pressedElevatorButtons = new TreeSet<>(Button.buttonComparator);
 
     public ElevatorControlSystem(Elevator elevator, Building building, CustomLogger logger) {
         this.logger = logger;
@@ -28,23 +33,82 @@ public class ElevatorControlSystem implements Runnable {
     private void handleElevatorCalls() {
         detectPressedButtons();
 
-        if (destinationFloorNumbers.isEmpty()) {
+        int nextDest = findNextDestination();
+        if (nextDest == elevator.getCurrentFloorNumber()) {
+            logger.logECS("Nothing to send, skipping");
             return;
         }
 
-        sendDestinations();
+        sendDestination(nextDest);
+    }
+
+    private int findNextStopInCurrentDirection() {
+        Direction currentDirection = elevator.getMovementDirection();
+        int currentFloor = elevator.getCurrentFloorNumber();
+
+        if (currentDirection == Direction.UP) {
+            return lookUp(currentFloor);
+        } else {
+            return lookBelow(currentFloor);
+        }
+    }
+
+    private int lookUp(int currentFloor) {
+        // if any elvator buttons pressed - find first pressed elevator button above current floor
+        // else find the highest floor button pressed
+        if (!pressedElevatorButtons.isEmpty()) {
+            return pressedElevatorButtons.stream()
+                    .filter(button -> button.getFloorNumber() > currentFloor)
+                    .min(Button.buttonComparator).orElse(new ElevatorButton(currentFloor)).getFloorNumber();
+        } else {
+            return destinationFloorNumbers.stream()
+                    .filter(floorNumber -> floorNumber > currentFloor)
+                    .max(Integer::compareTo).orElse(currentFloor);
+        }
+    }
+
+    private int lookBelow(int currentFloor) {
+        // find first button pressed below current floor
+        return destinationFloorNumbers.stream()
+                .filter(floorNumber -> floorNumber < currentFloor)
+                .max(Integer::compareTo).orElse(currentFloor);
+    }
+
+    private boolean moreDestinationsOnTheWay() {
+        int currentFloor = elevator.getCurrentFloorNumber();
+        if (elevator.getMovementDirection() == Direction.UP) {
+            return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber > currentFloor);
+        } else {
+            return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber < currentFloor);
+        }
+    }
+
+    private int findNextDestination() {
+        int currentFloor = elevator.getCurrentFloorNumber();
+        Set<Integer> extremes = Set.of(1, building.getFloors().size());
+
+        if (!elevator.isMoving() && extremes.contains(currentFloor) || !moreDestinationsOnTheWay()) {
+            toggleElevatorMovementDirection();
+        }
+
+        return findNextStopInCurrentDirection();
     }
 
     private void detectPressedButtons() {
         detectPressedElevatorButtons();
         detectPressedFloorButtons();
+        // logger.logECS("Detected pressed elevator buttons: " + Button.buttonsToString(pressedElevatorButtons));
+        // logger.logECS("Detected pressed floor buttons: " + Button.buttonsToString(pressedFloorButtons));
     }
 
     private void detectPressedElevatorButtons() {
         synchronized (elevator.getElevatorButtons()) {
             elevator.getElevatorButtons().stream()
                     .filter(ElevatorButton::isPressed)
-                    .forEach(pressedButton -> destinationFloorNumbers.add(pressedButton.floorNumber));
+                    .collect(Collectors.toCollection(() -> pressedElevatorButtons));
+            destinationFloorNumbers.addAll(pressedElevatorButtons.stream()
+                    .map(ElevatorButton::getFloorNumber)
+                    .collect(Collectors.toSet()));
         }
     }
 
@@ -53,15 +117,27 @@ public class ElevatorControlSystem implements Runnable {
             building.getFloors().stream()
                     .map(Floor::getButton)
                     .filter(FloorButton::isPressed)
-                    .forEach(pressedButton -> destinationFloorNumbers.add(pressedButton.floorNumber));
+                    .collect(Collectors.toCollection(() -> pressedFloorButtons));
+            destinationFloorNumbers.addAll(pressedFloorButtons.stream()
+                    .map(FloorButton::getFloorNumber)
+                    .collect(Collectors.toSet()));
         }
     }
 
-    private void sendDestinations() {
-        logger.logECS("Sending destinations: " + destinationFloorNumbers);
-        elevator.addDestinations(destinationFloorNumbers);
+    private void sendDestination(int destination) {
+        logger.logECS("Sending destination: " + destination);
+        elevator.addDestinations(new TreeSet<>(Collections.singleton(destination)));
         destinationFloorNumbers.clear();
         elevator.wakeUp();
+    }
+
+    private void toggleElevatorMovementDirection() {
+        Direction currentDirection = elevator.getMovementDirection();
+        if (currentDirection == Direction.UP) {
+            elevator.setMovementDirection(Direction.DOWN);
+        } else {
+            elevator.setMovementDirection(Direction.UP);
+        }
     }
 
     private Floor findMatchingFloor(int floorNumber) {
