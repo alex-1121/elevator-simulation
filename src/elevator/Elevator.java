@@ -37,8 +37,6 @@ public class Elevator implements Runnable {
         synchronized (elevatorButtons) {
             building.getFloors().forEach(floor -> elevatorButtons.add(new ElevatorButton(floor.floorNumber)));
         }
-
-        logger.logElevator("Starting at floor " + currentFloorNumber + "/" + building.getFloors().size());
     }
 
     private Integer findNextDestination() {
@@ -202,7 +200,7 @@ public class Elevator implements Runnable {
 
     @Override
     public void run() {
-        logger.logElevator("Started");
+        logger.logElevator("Started at floor " + currentFloorNumber);
         while (shouldRun) {
             waitIfNeeded();
             goToDestinationFloor();
