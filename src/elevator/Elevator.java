@@ -33,7 +33,6 @@ public class Elevator implements Runnable {
         this.building = building;
         this.capacity = capacity;
         this.currentFloorNumber = currentFloorNumber;
-        this.destinationFloorNumber = currentFloorNumber;
         synchronized (elevatorButtons) {
             building.getFloors().forEach(floor -> elevatorButtons.add(new ElevatorButton(floor.floorNumber)));
         }

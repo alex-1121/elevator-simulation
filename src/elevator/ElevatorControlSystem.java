@@ -34,7 +34,7 @@ public class ElevatorControlSystem implements Runnable {
         detectPressedButtons();
 
         int nextDest = findNextDestination();
-        if (nextDest == elevator.getCurrentFloorNumber() || nextDest == elevator.getDestinationFloorNumber()) {
+        if (nextDest == elevator.getDestinationFloorNumber()) {
             return;
         }
 
