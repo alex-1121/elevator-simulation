@@ -53,8 +53,8 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private int lookUp(int currentFloor) {
-        // if any elvator buttons pressed - find first pressed elevator button above current floor
-        // else find the highest floor button pressed
+        // If any elevator buttons pressed - find first pressed elevator button above current floor
+        // Else find the highest floor button pressed
         if (!pressedElevatorButtons.isEmpty()) {
             return pressedElevatorButtons.stream()
                     .filter(button -> button.getFloorNumber() > currentFloor)
@@ -67,7 +67,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private int lookBelow(int currentFloor) {
-        // find first button pressed below current floor
+        // Find first button pressed below current floor
         return destinationFloorNumbers.stream()
                 .filter(floorNumber -> floorNumber < currentFloor)
                 .max(Integer::compareTo).orElse(currentFloor);
