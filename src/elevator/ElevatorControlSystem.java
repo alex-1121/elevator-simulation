@@ -101,6 +101,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void detectPressedElevatorButtons() {
+        pressedElevatorButtons.clear();
         synchronized (elevator.getElevatorButtons()) {
             elevator.getElevatorButtons().stream()
                     .filter(ElevatorButton::isPressed)
@@ -112,6 +113,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void detectPressedFloorButtons() {
+        pressedFloorButtons.clear();
         synchronized (building.getFloors()) {
             building.getFloors().stream()
                     .map(Floor::getButton)
