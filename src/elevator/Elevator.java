@@ -141,6 +141,10 @@ public class Elevator implements Runnable {
         }
     }
 
+    public int getDestinationFloorNumber() {
+        return destinationFloorNumber;
+    }
+
     public boolean atDestination() {
         return currentFloorNumber == destinationFloorNumber;
     }
