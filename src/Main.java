@@ -24,5 +24,6 @@ public class Main {
         ecsRunnable.start();
         elevatorRunnable.start();
         passengerGeneratorRunnable.start();
+        logger.logMain("All threads started");
     }
 }
