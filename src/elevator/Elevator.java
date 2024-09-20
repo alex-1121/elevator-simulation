@@ -22,7 +22,6 @@ public class Elevator implements Runnable {
     private static final Integer TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
-    private final SortedSet<Integer> destinationFloorNumbers = Collections.synchronizedSortedSet(new TreeSet<>());
     private Integer destinationFloorNumber;
     private boolean isMoving = false;
     private Integer currentFloorNumber;
@@ -39,13 +38,6 @@ public class Elevator implements Runnable {
     }
 
     private void goToDestinationFloor() {
-        synchronized (destinationFloorNumbers) {
-            if (this.destinationFloorNumbers.isEmpty()) {
-                return;
-            }
-            this.destinationFloorNumber = destinationFloorNumbers.first();
-        }
-
         logger.logPassengers("Passengers: " + passengers);
         logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
         while (!atDestination()) {
@@ -53,9 +45,6 @@ public class Elevator implements Runnable {
             makeStep();
         }
         isMoving = false;
-        synchronized (destinationFloorNumbers) {
-            destinationFloorNumbers.remove(currentFloorNumber);
-        }
         releaseButtons();
         loadAndUnloadPassengers();
     }
@@ -144,6 +133,10 @@ public class Elevator implements Runnable {
         return destinationFloorNumber;
     }
 
+    public void setDestinationFloorNumber(Integer destinationFloorNumber) {
+        this.destinationFloorNumber = destinationFloorNumber;
+    }
+
     public boolean atDestination() {
         return currentFloorNumber.equals(destinationFloorNumber);
     }
@@ -158,10 +151,6 @@ public class Elevator implements Runnable {
 
     public Integer getCurrentFloorNumber() {
         return currentFloorNumber;
-    }
-
-    public void addDestinations(Set<Integer> newDestinations) {
-        this.destinationFloorNumbers.addAll(newDestinations);
     }
 
     public void setMovementDirection(Direction movementDirection) {

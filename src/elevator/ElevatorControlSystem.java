@@ -103,6 +103,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void detectPressedButtons() {
+        destinationFloorNumbers.clear();
         detectPressedElevatorButtons();
         detectPressedFloorButtons();
         // logger.logECS("Detected pressed elevator buttons: " + Button.buttonsToString(pressedElevatorButtons));
@@ -136,8 +137,7 @@ public class ElevatorControlSystem implements Runnable {
 
     private void sendDestination(Integer destination) {
         logger.logECS("Sending destination: " + destination);
-        elevator.addDestinations(new TreeSet<>(Collections.singleton(destination)));
-        destinationFloorNumbers.clear();
+        elevator.setDestinationFloorNumber(destination);
         elevator.wakeUp();
     }
 
