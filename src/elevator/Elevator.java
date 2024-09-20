@@ -17,18 +17,18 @@ public class Elevator implements Runnable {
     private final Object lock = new Object();
 
     private final Building building;
-    private final int capacity;
+    private final Integer capacity;
     private final ArrayList<Passenger> passengers = new ArrayList<>();
-    private static final int TIME_TO_MOVE_BETWEEN_FLOORS = 500;
+    private static final Integer TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
     private final SortedSet<Integer> destinationFloorNumbers = Collections.synchronizedSortedSet(new TreeSet<>());
-    private int destinationFloorNumber;
+    private Integer destinationFloorNumber;
     private boolean isMoving = false;
-    private int currentFloorNumber;
+    private Integer currentFloorNumber;
     private Direction movementDirection;
 
-    public Elevator(int capacity, Building building, int currentFloorNumber, CustomLogger logger) {
+    public Elevator(Integer capacity, Building building, Integer currentFloorNumber, CustomLogger logger) {
         this.logger = logger;
         this.building = building;
         this.capacity = capacity;
@@ -75,13 +75,13 @@ public class Elevator implements Runnable {
     private void releaseButtons() {
         synchronized (elevatorButtons) {
             elevatorButtons.stream()
-                    .filter(button -> button.getFloorNumber() == currentFloorNumber)
+                    .filter(button -> button.getFloorNumber().equals(currentFloorNumber))
                     .findFirst()
                     .ifPresent(Button::release);
         }
         synchronized (building.getFloors()) {
             building.getFloors().stream()
-                    .filter(floor -> floor.floorNumber == currentFloorNumber)
+                    .filter(floor -> floor.floorNumber.equals(currentFloorNumber))
                     .findFirst()
                     .ifPresent(floor -> floor.getButton().release());
         }
@@ -96,7 +96,7 @@ public class Elevator implements Runnable {
     private void unloadPassengers(Floor currentFloor) {
         ArrayList<Passenger> passengersToUnload = new ArrayList<>();
         this.passengers.stream()
-                .filter(passenger -> passenger.destinationFloorNumber == currentFloor.floorNumber)
+                .filter(passenger -> passenger.destinationFloorNumber.equals(currentFloor.floorNumber))
                 .forEach(passengersToUnload::add);
         if (passengersToUnload.isEmpty()) {
             return;
@@ -124,10 +124,10 @@ public class Elevator implements Runnable {
         logger.logElevator("New passengers: " + newPassengers + ", total passengers: " + this.passengers.size() + "/" + capacity);
     }
 
-    private void pressElevatorButton(int destinationFloorNumber) {
+    private void pressElevatorButton(Integer destinationFloorNumber) {
         synchronized (elevatorButtons) {
             elevatorButtons.stream()
-                    .filter(button -> button.getFloorNumber() == destinationFloorNumber)
+                    .filter(button -> button.getFloorNumber().equals(destinationFloorNumber))
                     .findFirst().ifPresent(Button::press);
         }
     }
@@ -140,12 +140,12 @@ public class Elevator implements Runnable {
         }
     }
 
-    public int getDestinationFloorNumber() {
+    public Integer getDestinationFloorNumber() {
         return destinationFloorNumber;
     }
 
     public boolean atDestination() {
-        return currentFloorNumber == destinationFloorNumber;
+        return currentFloorNumber.equals(destinationFloorNumber);
     }
 
     public synchronized Collection<ElevatorButton> getElevatorButtons() {
@@ -156,7 +156,7 @@ public class Elevator implements Runnable {
         return isMoving;
     }
 
-    public int getCurrentFloorNumber() {
+    public Integer getCurrentFloorNumber() {
         return currentFloorNumber;
     }
 
@@ -189,7 +189,7 @@ public class Elevator implements Runnable {
     }
 
     private void waitIfNeeded() {
-        while (destinationFloorNumbers.isEmpty()) {
+        if (atDestination() || destinationFloorNumber == null) {
             synchronized (lock) {
                 try {
                     logger.logElevator("Waiting for calls");

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class Floor {
-    public final int floorNumber;
+    public final Integer floorNumber;
     private final FloorButton button;
     private final Collection<Passenger> waitingPassengers = Collections.synchronizedCollection(new ArrayList<>());
 

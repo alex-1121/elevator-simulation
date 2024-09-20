@@ -14,8 +14,8 @@ public class Building {
         }
     }
 
-    public Floor getFloorByNumber(int floorNumber) {
-        return floors.stream().filter(f -> f.floorNumber == floorNumber).findFirst().orElse(null);
+    public Floor getFloorByNumber(Integer floorNumber) {
+        return floors.stream().filter(f -> f.floorNumber.equals(floorNumber)).findFirst().orElse(null);
     }
 
     public Collection<Floor> getFloors() {

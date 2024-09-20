@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 public class Button {
     public static final Comparator<Button> buttonComparator = Comparator.comparingInt(Button::getFloorNumber);
 
-    private final int floorNumber;
+    private final Integer floorNumber;
     private boolean isPressed = false;
 
-    public Button(int floorNumber) {
+    public Button(Integer floorNumber) {
         this.floorNumber = floorNumber;
     }
 
@@ -26,7 +26,7 @@ public class Button {
         return isPressed;
     }
 
-    public int getFloorNumber() {
+    public Integer getFloorNumber() {
         return floorNumber;
     }
 

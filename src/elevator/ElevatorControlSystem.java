@@ -33,16 +33,16 @@ public class ElevatorControlSystem implements Runnable {
     private void handleElevatorCalls() {
         detectPressedButtons();
 
-        int nextDest = findNextDestination();
-        if (nextDest == elevator.getDestinationFloorNumber()) {
+        Integer nextDest = findNextDestination();
+        if (nextDest.equals(elevator.getCurrentFloorNumber())) {
             return;
         }
 
         sendDestination(nextDest);
     }
 
-    private int findNextDestination() {
-        int currentFloor = elevator.getCurrentFloorNumber();
+    private Integer findNextDestination() {
+        Integer currentFloor = elevator.getCurrentFloorNumber();
         Set<Integer> extremes = Set.of(1, building.getFloors().size());
 
         if (!elevator.isMoving() && extremes.contains(currentFloor) || !moreDestinationsOnTheWay()) {
@@ -61,9 +61,9 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private int findNextStopInCurrentDirection() {
+    private Integer findNextStopInCurrentDirection() {
         Direction currentDirection = elevator.getMovementDirection();
-        int currentFloor = elevator.getCurrentFloorNumber();
+        Integer currentFloor = elevator.getCurrentFloorNumber();
 
         if (currentDirection == Direction.UP) {
             return lookUp(currentFloor);
@@ -72,7 +72,7 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private int lookUp(int currentFloor) {
+    private Integer lookUp(Integer currentFloor) {
         // If any elevator buttons pressed - find first pressed elevator button above current floor
         // Else find the highest floor button pressed
         if (!pressedElevatorButtons.isEmpty()) {
@@ -86,7 +86,7 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private int lookBelow(int currentFloor) {
+    private Integer lookBelow(Integer currentFloor) {
         // Find first button pressed below current floor
         return destinationFloorNumbers.stream()
                 .filter(floorNumber -> floorNumber < currentFloor)
@@ -94,7 +94,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private boolean moreDestinationsOnTheWay() {
-        int currentFloor = elevator.getCurrentFloorNumber();
+        Integer currentFloor = elevator.getCurrentFloorNumber();
         if (elevator.getMovementDirection() == Direction.UP) {
             return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber > currentFloor);
         } else {
@@ -134,16 +134,16 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private void sendDestination(int destination) {
+    private void sendDestination(Integer destination) {
         logger.logECS("Sending destination: " + destination);
         elevator.addDestinations(new TreeSet<>(Collections.singleton(destination)));
         destinationFloorNumbers.clear();
         elevator.wakeUp();
     }
 
-    private Floor findMatchingFloor(int floorNumber) {
+    private Floor findMatchingFloor(Integer floorNumber) {
         return building.getFloors().stream().
-                filter(floor -> floor.floorNumber == floorNumber)
+                filter(floor -> floor.floorNumber.equals(floorNumber))
                 .findFirst().orElseThrow();
     }
 

@@ -1,7 +1,7 @@
 package passenger;
 
 public class Passenger {
-    public final int destinationFloorNumber;
+    public final Integer destinationFloorNumber;
 
     public Passenger(int destinationFloorNumber) {
         this.destinationFloorNumber = destinationFloorNumber;
