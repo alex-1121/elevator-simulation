@@ -172,20 +172,6 @@ public class Elevator implements Runnable {
         return this.movementDirection;
     }
 
-
-    private void waitIfNeeded() {
-        while (destinationFloorNumbers.isEmpty()) {
-            synchronized (lock) {
-                try {
-                    logger.logElevator("Waiting for calls");
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    logger.logError(e);
-                }
-            }
-        }
-    }
-
     public void wakeUp() {
         synchronized (lock) {
             lock.notify();
@@ -200,6 +186,19 @@ public class Elevator implements Runnable {
             goToDestinationFloor();
         }
         logger.logElevator("Stopped");
+    }
+
+    private void waitIfNeeded() {
+        while (destinationFloorNumbers.isEmpty()) {
+            synchronized (lock) {
+                try {
+                    logger.logElevator("Waiting for calls");
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    logger.logError(e);
+                }
+            }
+        }
     }
 
     public void stopThread() {

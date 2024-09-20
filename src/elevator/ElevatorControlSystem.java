@@ -41,6 +41,26 @@ public class ElevatorControlSystem implements Runnable {
         sendDestination(nextDest);
     }
 
+    private int findNextDestination() {
+        int currentFloor = elevator.getCurrentFloorNumber();
+        Set<Integer> extremes = Set.of(1, building.getFloors().size());
+
+        if (!elevator.isMoving() && extremes.contains(currentFloor) || !moreDestinationsOnTheWay()) {
+            toggleElevatorMovementDirection();
+        }
+
+        return findNextStopInCurrentDirection();
+    }
+
+    private void toggleElevatorMovementDirection() {
+        Direction currentDirection = elevator.getMovementDirection();
+        if (currentDirection == Direction.UP) {
+            elevator.setMovementDirection(Direction.DOWN);
+        } else {
+            elevator.setMovementDirection(Direction.UP);
+        }
+    }
+
     private int findNextStopInCurrentDirection() {
         Direction currentDirection = elevator.getMovementDirection();
         int currentFloor = elevator.getCurrentFloorNumber();
@@ -82,17 +102,6 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private int findNextDestination() {
-        int currentFloor = elevator.getCurrentFloorNumber();
-        Set<Integer> extremes = Set.of(1, building.getFloors().size());
-
-        if (!elevator.isMoving() && extremes.contains(currentFloor) || !moreDestinationsOnTheWay()) {
-            toggleElevatorMovementDirection();
-        }
-
-        return findNextStopInCurrentDirection();
-    }
-
     private void detectPressedButtons() {
         detectPressedElevatorButtons();
         detectPressedFloorButtons();
@@ -130,15 +139,6 @@ public class ElevatorControlSystem implements Runnable {
         elevator.addDestinations(new TreeSet<>(Collections.singleton(destination)));
         destinationFloorNumbers.clear();
         elevator.wakeUp();
-    }
-
-    private void toggleElevatorMovementDirection() {
-        Direction currentDirection = elevator.getMovementDirection();
-        if (currentDirection == Direction.UP) {
-            elevator.setMovementDirection(Direction.DOWN);
-        } else {
-            elevator.setMovementDirection(Direction.UP);
-        }
     }
 
     private Floor findMatchingFloor(int floorNumber) {
