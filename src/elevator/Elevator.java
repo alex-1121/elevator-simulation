@@ -23,7 +23,7 @@ public class Elevator implements Runnable {
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
     private Integer destinationFloorNumber;
-    private boolean isMoving = false;
+    private boolean isStopped = true;
     private Integer currentFloorNumber;
     private Direction movementDirection;
 
@@ -41,10 +41,10 @@ public class Elevator implements Runnable {
         logger.logPassengers("Passengers: " + passengers);
         logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
         while (!atDestination()) {
-            isMoving = true;
+            isStopped = false;
             makeStep();
         }
-        isMoving = false;
+        isStopped = true;
         releaseButtons();
         loadAndUnloadPassengers();
     }
@@ -145,8 +145,8 @@ public class Elevator implements Runnable {
         return this.elevatorButtons;
     }
 
-    public boolean isMoving() {
-        return isMoving;
+    public boolean isStopped() {
+        return isStopped;
     }
 
     public Integer getCurrentFloorNumber() {
