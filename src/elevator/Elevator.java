@@ -58,7 +58,7 @@ public class Elevator implements Runnable {
             currentFloorNumber--;
             movementDirection = Direction.DOWN;
         }
-        logger.logElevator("Moving " + movementDirection + ", " + currentFloorNumber + "/" + building.getFloors().size());
+        logger.logElevator("Moving " + movementDirection + ", " + currentFloorNumber + "/" + building.getFloorCount());
     }
 
     private void releaseButtons() {

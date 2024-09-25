@@ -21,4 +21,12 @@ public class Building {
     public Collection<Floor> getFloors() {
         return floors;
     }
+
+    public int getFloorCount() {
+        return floors.size();
+    }
+
+    public int getBottomFloorNumber() {
+        return floors.stream().mapToInt(f -> f.floorNumber).min().orElseThrow();
+    }
 }

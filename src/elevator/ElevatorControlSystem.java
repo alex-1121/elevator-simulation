@@ -42,7 +42,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private Integer findNextDestination() {
-        Set<Integer> extremes = Set.of(1, building.getFloors().size());
+        Set<Integer> extremes = Set.of(building.getBottomFloorNumber(), building.getFloorCount());
         boolean elevatorAtExtremes = extremes.contains(elevator.getCurrentFloorNumber());
 
         if (elevator.isStopped() && elevatorAtExtremes || !moreDestinationsOnTheWay()) {
