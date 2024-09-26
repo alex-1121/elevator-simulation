@@ -14,7 +14,7 @@ public class Elevator implements Runnable {
     private final CustomLogger logger;
 
     private boolean shouldRun = true;
-    private final Object lock = new Object();
+    private final Object sleepLock = new Object();
 
     private final Building building;
     private final Integer capacity;
@@ -25,7 +25,8 @@ public class Elevator implements Runnable {
     private Integer destinationFloorNumber;
     private boolean isStopped = true;
     private Integer currentFloorNumber;
-    private Direction movementDirection;
+    private Direction movementDirection = Direction.UP;
+    private final Object directionLock = new Object();
 
     public Elevator(Integer capacity, Building building, Integer currentFloorNumber, CustomLogger logger) {
         this.logger = logger;
@@ -40,11 +41,13 @@ public class Elevator implements Runnable {
     private void goToDestinationFloor() {
         logger.logPassengers("Passengers: " + passengers);
         logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
-        while (!atDestination()) {
-            isStopped = false;
-            makeStep();
+        synchronized (directionLock) {
+            while (!atDestination()) {
+                isStopped = false;
+                makeStep();
+            }
+            isStopped = true;
         }
-        isStopped = true;
         releaseButtons();
         loadAndUnloadPassengers();
     }
@@ -154,16 +157,20 @@ public class Elevator implements Runnable {
     }
 
     public void setMovementDirection(Direction movementDirection) {
-        this.movementDirection = movementDirection;
+        synchronized (directionLock) {
+            this.movementDirection = movementDirection;
+        }
     }
 
     public Direction getMovementDirection() {
-        return this.movementDirection;
+        synchronized (directionLock) {
+            return this.movementDirection;
+        }
     }
 
     public void wakeUp() {
-        synchronized (lock) {
-            lock.notify();
+        synchronized (sleepLock) {
+            sleepLock.notify();
         }
     }
 
@@ -179,10 +186,10 @@ public class Elevator implements Runnable {
 
     private void waitIfNeeded() {
         if (atDestination() || destinationFloorNumber == null) {
-            synchronized (lock) {
+            synchronized (sleepLock) {
                 try {
                     logger.logElevator("Waiting for calls");
-                    lock.wait();
+                    sleepLock.wait();
                 } catch (InterruptedException e) {
                     logger.logError(e);
                 }
