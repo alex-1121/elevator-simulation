@@ -40,13 +40,18 @@ public class Elevator implements Runnable {
 
     private void goToDestinationFloor() {
         logger.logPassengers("Passengers: " + passengers);
-        logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
-        synchronized (directionLock) {
-            while (!atDestination()) {
-                isStopped = false;
-                makeStep();
+
+        if (atDestination()) {
+            logger.logElevator("Already at destination floor: " + this.destinationFloorNumber);
+        } else {
+            logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
+            synchronized (directionLock) {
+                while (!atDestination()) {
+                    isStopped = false;
+                    makeStep();
+                }
+                isStopped = true;
             }
-            isStopped = true;
         }
         releaseButtons();
         loadAndUnloadPassengers();
