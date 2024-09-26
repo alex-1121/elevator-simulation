@@ -33,23 +33,22 @@ public class ElevatorControlSystem implements Runnable {
     private void handleElevatorCalls() {
         detectPressedButtons();
 
-        Integer nextDest = findNextDestination();
-        if (nextDest.equals(elevator.getCurrentFloorNumber())) {
+        if (destinationFloorNumbers.isEmpty()) {
             return;
         }
 
-        sendDestination(nextDest);
-    }
-
-    private Integer findNextDestination() {
-        Set<Integer> extremes = Set.of(building.getBottomFloorNumber(), building.getFloorCount());
-        boolean elevatorAtExtremes = extremes.contains(elevator.getCurrentFloorNumber());
-
-        if (elevator.isStopped() && elevatorAtExtremes || !moreDestinationsOnTheWay()) {
+        if (elevator.isStopped() && !isMoreDestinationsOnTheWay()) {
             toggleElevatorMovementDirection();
         }
 
-        return findNextStopInCurrentDirection();
+        Optional<Integer> nextDestination;
+        if (elevator.getMovementDirection() == Direction.UP) {
+            nextDestination = lookUp();
+        } else {
+            nextDestination = lookBelow();
+        }
+
+        nextDestination.ifPresent(this::sendDestination);
     }
 
     private void toggleElevatorMovementDirection() {
@@ -61,39 +60,28 @@ public class ElevatorControlSystem implements Runnable {
         }
     }
 
-    private Integer findNextStopInCurrentDirection() {
-        Direction currentDirection = elevator.getMovementDirection();
-        Integer currentFloor = elevator.getCurrentFloorNumber();
-
-        if (currentDirection == Direction.UP) {
-            return lookUp(currentFloor);
-        } else {
-            return lookBelow(currentFloor);
-        }
-    }
-
-    private Integer lookUp(Integer currentFloor) {
+    private Optional<Integer> lookUp() {
         // If any elevator buttons pressed - find first pressed elevator button above current floor
         // Else find the highest floor button pressed
-        if (!pressedElevatorButtons.isEmpty()) {
-            return pressedElevatorButtons.stream()
-                    .filter(button -> button.getFloorNumber() > currentFloor)
-                    .min(Button.buttonComparator).orElse(new ElevatorButton(currentFloor)).getFloorNumber();
-        } else {
-            return destinationFloorNumbers.stream()
-                    .filter(floorNumber -> floorNumber > currentFloor)
-                    .max(Integer::compareTo).orElse(currentFloor);
-        }
+        Optional<Integer> nextDestination = pressedElevatorButtons.stream()
+                .filter(button -> button.getFloorNumber() > elevator.getCurrentFloorNumber())
+                .min(Button.buttonComparator)
+                .map(Button::getFloorNumber);
+
+
+        return Optional.of(nextDestination.orElseGet(() -> destinationFloorNumbers.stream()
+                .filter(floorNumber -> floorNumber > elevator.getCurrentFloorNumber())
+                .max(Integer::compareTo).orElse(elevator.getCurrentFloorNumber())));
     }
 
-    private Integer lookBelow(Integer currentFloor) {
+    private Optional<Integer> lookBelow() {
         // Find first button pressed below current floor
-        return destinationFloorNumbers.stream()
-                .filter(floorNumber -> floorNumber < currentFloor)
-                .max(Integer::compareTo).orElse(currentFloor);
+        return Optional.of(destinationFloorNumbers.stream()
+                .filter(floorNumber -> floorNumber < elevator.getCurrentFloorNumber())
+                .max(Integer::compareTo).orElse(elevator.getCurrentFloorNumber()));
     }
 
-    private boolean moreDestinationsOnTheWay() {
+    private boolean isMoreDestinationsOnTheWay() {
         Integer currentFloor = elevator.getCurrentFloorNumber();
         if (elevator.getMovementDirection() == Direction.UP) {
             return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber > currentFloor);
