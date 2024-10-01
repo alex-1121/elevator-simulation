@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class PassengerGenerator implements Runnable {
 
     private boolean shouldRun = true;
-    private static final long GENERATION_INTERVAL = 1000;
+    private static final long GENERATION_INTERVAL = 200;
 
     private final Building building;
     private final CustomLogger logger;
@@ -25,9 +25,18 @@ public class PassengerGenerator implements Runnable {
     @Override
     public void run() {
         logger.logPassengers("Started");
+        int counter = 0;
         while (shouldRun) {
             generateResidentialPassenger();
             executeGenerationInterval();
+            counter++;
+            if (counter > 10) {
+                counter = 0;
+                long waitingPassengers = building.getFloors().stream()
+                        .map(floor -> floor.getWaitingPassengers().size())
+                        .collect(Collectors.summarizingInt(Integer::intValue)).getSum();
+                logger.logPassengers("Waiting passengers: " + waitingPassengers);
+            }
         }
         logger.logPassengers("Stopped");
     }
@@ -54,7 +63,16 @@ public class PassengerGenerator implements Runnable {
             startingFloorNumber = getRandomFloorNumberExcept(1);
             destinationFloorNumber = 1;
         }
+        createPassenger(startingFloorNumber, destinationFloorNumber);
+    }
 
+    // Office workers can go between random floors. There's 2 in 3 chance they start or finish at 1st floor, and 1 in 3
+    // chance they start and finish on random floors.
+    private void generateOfficeWorkerPassenger() {
+        // TODO: Implement this method
+    }
+
+    public void createPassenger(int startingFloorNumber, int destinationFloorNumber) {
         Floor floor = building.getFloorByNumber(startingFloorNumber);
         Passenger passenger = new Passenger(destinationFloorNumber);
         synchronized (building.getFloors()) {
@@ -62,12 +80,6 @@ public class PassengerGenerator implements Runnable {
             floor.getButton().press();
         }
         logger.logPassengers("Generated passenger at floor " + startingFloorNumber + ", dest: " + destinationFloorNumber);
-    }
-
-    // Office workers can go between random floors. There's 2 in 3 chance they start or finish at 1st floor, and 1 in 3
-    // chance they start and finish on random floors.
-    private void generateOfficeWorkerPassenger() {
-        // TODO: Implement this method
     }
 
     private void executeGenerationInterval() {

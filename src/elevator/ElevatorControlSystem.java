@@ -32,7 +32,6 @@ public class ElevatorControlSystem implements Runnable {
 
     private void handleElevatorCalls() {
         detectPressedButtons();
-
         if (destinationFloorNumbers.isEmpty()) {
             return;
         }
@@ -67,7 +66,6 @@ public class ElevatorControlSystem implements Runnable {
                 .filter(button -> button.getFloorNumber() > elevator.getCurrentFloorNumber())
                 .min(Button.buttonComparator)
                 .map(Button::getFloorNumber);
-
 
         return Optional.of(nextDestination.orElseGet(() -> destinationFloorNumbers.stream()
                 .filter(floorNumber -> floorNumber > elevator.getCurrentFloorNumber())
@@ -124,6 +122,10 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void sendDestination(Integer destination) {
+        if (destination.equals(elevator.getCurrentFloorNumber()) && elevator.isNotSleeping()) {
+            return;
+        }
+
         logger.logECS("Sending destination: " + destination);
         elevator.setDestinationFloorNumber(destination);
         elevator.wakeUp();
