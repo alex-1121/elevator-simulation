@@ -122,7 +122,7 @@ public class ElevatorControlSystem implements Runnable {
     }
 
     private void sendDestination(Integer destination) {
-        if (destination.equals(elevator.getCurrentFloorNumber()) && elevator.isNotSleeping()) {
+        if (destination.equals(elevator.getDestinationFloorNumber()) && elevator.isNotSleeping()) {
             return;
         }
 
