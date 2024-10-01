@@ -26,8 +26,7 @@ public class Elevator implements Runnable {
     private Integer destinationFloorNumber;
     private boolean isStopped = true;
     private Integer currentFloorNumber;
-    private Direction movementDirection = Direction.UP;
-    private final Object directionLock = new Object();
+    private final ElevatorDirection movementDirection = new ElevatorDirection(Direction.UP);
 
     public Elevator(Integer capacity, Building building, Integer currentFloorNumber, CustomLogger logger) {
         this.logger = logger;
@@ -46,7 +45,7 @@ public class Elevator implements Runnable {
             logger.logElevator("Already at destination floor: " + this.destinationFloorNumber);
         } else {
             logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
-            synchronized (directionLock) {
+            synchronized (movementDirection) {
                 while (!atDestination()) {
                     isStopped = false;
                     makeStep();
@@ -62,10 +61,10 @@ public class Elevator implements Runnable {
         simulateElevatorMovingTime();
         if (currentFloorNumber < this.destinationFloorNumber) {
             currentFloorNumber++;
-            movementDirection = Direction.UP;
+            movementDirection.setDirection(Direction.UP);
         } else {
             currentFloorNumber--;
-            movementDirection = Direction.DOWN;
+            movementDirection.setDirection(Direction.DOWN);
         }
         logger.logElevator("Moving " + movementDirection + ", " + currentFloorNumber + "/" + building.getFloorCount());
     }
@@ -163,14 +162,14 @@ public class Elevator implements Runnable {
     }
 
     public void setMovementDirection(Direction movementDirection) {
-        synchronized (directionLock) {
-            this.movementDirection = movementDirection;
+        synchronized (this.movementDirection) {
+            this.movementDirection.setDirection(movementDirection);
         }
     }
 
     public Direction getMovementDirection() {
-        synchronized (directionLock) {
-            return this.movementDirection;
+        synchronized (this.movementDirection) {
+            return this.movementDirection.getDirection();
         }
     }
 
