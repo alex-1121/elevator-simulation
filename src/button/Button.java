@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Button {
+public abstract class Button {
     public static final Comparator<Button> buttonComparator = Comparator.comparingInt(Button::getFloorNumber);
 
     private final Integer floorNumber;
