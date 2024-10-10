@@ -14,7 +14,6 @@ public class Elevator implements Runnable {
     private final CustomLogger logger;
 
     private boolean shouldRun = true;
-    private final Object sleepLock = new Object();
     private boolean isSleeping = false;
 
     private final Building building;
@@ -174,8 +173,8 @@ public class Elevator implements Runnable {
     }
 
     public void wakeUp() {
-        synchronized (sleepLock) {
-            sleepLock.notify();
+        synchronized (this) {
+            notify();
             isSleeping = false;
         }
     }
@@ -192,14 +191,14 @@ public class Elevator implements Runnable {
 
     private void waitIfNeeded() {
         if (atDestination() || destinationFloorNumber == null) {
-            synchronized (sleepLock) {
-                try {
-                    logger.logElevator("Waiting for calls");
+            try {
+                logger.logElevator("Waiting for calls");
+                synchronized (this) {
                     isSleeping = true;
-                    sleepLock.wait();
-                } catch (InterruptedException e) {
-                    logger.logError(e);
+                    wait();
                 }
+            } catch (InterruptedException e) {
+                logger.logError(e);
             }
         }
     }
