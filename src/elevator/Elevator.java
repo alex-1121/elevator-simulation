@@ -18,7 +18,7 @@ public class Elevator implements Runnable {
 
     private final Building building;
     private final Integer capacity;
-    private final ArrayList<Passenger> passengers = new ArrayList<>();
+    private final List<Passenger> passengers = new ArrayList<>();
     private static final Integer TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
