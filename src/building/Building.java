@@ -24,8 +24,4 @@ public class Building {
     public int getFloorCount() {
         return floors.size();
     }
-
-    public int getBottomFloorNumber() {
-        return floors.stream().mapToInt(f -> f.floorNumber).min().orElseThrow();
-    }
 }
