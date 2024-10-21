@@ -4,7 +4,7 @@ import elevator.Elevator;
 import elevator.ElevatorControlSystem;
 import passenger.PassengerGenerator;
 
-public class Main {
+public class ElevatorSimulation {
 
     private static final CustomLogger logger = new CustomLogger();
 
