@@ -1,8 +1,14 @@
-import customLogger.CustomLogger;
-import building.Building;
-import elevator.Elevator;
-import elevator.ElevatorControlSystem;
-import passenger.PassengerGenerator;
+import main.customLogger.CustomLogger;
+import main.building.Building;
+import main.elevator.Elevator;
+import main.elevator.ElevatorControlSystem;
+import main.passenger.PassengerGenerator;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ElevatorSimulation {
 

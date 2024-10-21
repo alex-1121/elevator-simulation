@@ -1,4 +1,4 @@
-package customLogger;
+package main.customLogger;
 
 import java.util.logging.Logger;
 

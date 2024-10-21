@@ -1,11 +1,11 @@
-package elevator;
+package main.elevator;
 
-import building.FloorButton;
-import button.Button;
-import customLogger.CustomLogger;
-import building.Building;
-import building.Floor;
-import direction.Direction;
+import main.building.FloorButton;
+import main.button.Button;
+import main.customLogger.CustomLogger;
+import main.building.Building;
+import main.building.Floor;
+import main.Direction;
 
 import java.util.*;
 import java.util.stream.Collectors;

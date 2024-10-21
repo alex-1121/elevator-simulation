@@ -1,8 +1,8 @@
-package passenger;
+package main.passenger;
 
-import building.Building;
-import building.Floor;
-import customLogger.CustomLogger;
+import main.building.Building;
+import main.building.Floor;
+import main.customLogger.CustomLogger;
 
 import java.util.ArrayList;
 import java.util.Random;

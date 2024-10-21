@@ -1,4 +1,4 @@
-package passenger;
+package main.passenger;
 
 public class Passenger {
     public final Integer destinationFloorNumber;

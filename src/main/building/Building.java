@@ -1,4 +1,4 @@
-package building;
+package main.building;
 
 import java.util.ArrayList;
 import java.util.Collection;

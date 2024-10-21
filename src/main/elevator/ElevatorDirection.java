@@ -1,6 +1,6 @@
-package elevator;
+package main.elevator;
 
-import direction.Direction;
+import main.Direction;
 
 public class ElevatorDirection {
     private Direction direction;

@@ -1,6 +1,6 @@
-package building;
+package main.building;
 
-import passenger.Passenger;
+import main.passenger.Passenger;
 
 import java.util.ArrayList;
 import java.util.Collection;

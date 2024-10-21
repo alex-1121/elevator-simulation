@@ -1,5 +1,7 @@
-package building;
+package test.building;
 
+import main.building.Building;
+import main.building.Floor;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;

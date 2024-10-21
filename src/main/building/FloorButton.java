@@ -1,7 +1,7 @@
-package building;
+package main.building;
 
-import button.Button;
-import direction.Direction;
+import main.button.Button;
+import main.Direction;
 
 public class FloorButton extends Button {
     private final Direction direction;

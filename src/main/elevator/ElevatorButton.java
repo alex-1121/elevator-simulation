@@ -1,6 +1,6 @@
-package elevator;
+package main.elevator;
 
-import button.Button;
+import main.button.Button;
 
 public class ElevatorButton extends Button {
     public ElevatorButton(int floorNumber) {
