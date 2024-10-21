@@ -1,3 +1,4 @@
+import main.Stoppable;
 import main.customLogger.CustomLogger;
 import main.building.Building;
 import main.elevator.Elevator;
@@ -14,22 +15,41 @@ public class ElevatorSimulation {
 
     private static final CustomLogger logger = new CustomLogger();
 
-    public static void main(String[] args) {
-        int numberOfFloors = 5;
-        int elevatorCapacity = 6;
+    public static void main(String[] args) throws InterruptedException {
+        final int NUMBER_OF_FLOORS = 5;
+        final int ELEVATOR_CAPACITY = 6;
 
-        Building building = new Building(numberOfFloors);
-        Elevator elevator = new Elevator(elevatorCapacity, building, 3, logger);
-        ElevatorControlSystem ecs = new ElevatorControlSystem(elevator, building, logger);
-        PassengerGenerator passengerGenerator = new PassengerGenerator(building, logger);
+        Building building = new Building(NUMBER_OF_FLOORS);
+        Elevator elevator = new Elevator(ELEVATOR_CAPACITY, building, 3, logger);
 
-        Thread ecsRunnable = new Thread(ecs);
-        Thread elevatorRunnable = new Thread(elevator);
-        Thread passengerGeneratorRunnable = new Thread(passengerGenerator);
+        List<Stoppable> runnables = Arrays.asList(
+                elevator,
+                new ElevatorControlSystem(elevator, building, logger),
+                new PassengerGenerator(building, logger)
+        );
 
-        ecsRunnable.start();
-        elevatorRunnable.start();
-        passengerGeneratorRunnable.start();
+        List<Thread> threads = runnables.stream().map(Thread::new).toList();
+        threads.forEach(Thread::start);
+
         logger.logMain("All threads started");
+
+        try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor()) {
+            scheduler.scheduleAtFixedRate(() -> {
+                boolean isEveryThreadAlive = threads.stream().allMatch(Thread::isAlive);
+                if (!isEveryThreadAlive) {
+                    logger.logMain("Stopping all threads");
+                    runnables.forEach(Stoppable::stop);
+                    scheduler.shutdown();
+
+                }
+            }, 0, 1, TimeUnit.SECONDS);
+
+            // TODO This block of code was originally supposed to be outside of try block.
+            //  For some strange reason, scheduled task only works once if this code is not here.
+            for (Thread thread : threads) {
+                thread.join();
+            }
+            logger.logMain("All threads stopped");
+        }
     }
 }

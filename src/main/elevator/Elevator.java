@@ -1,5 +1,6 @@
 package main.elevator;
 
+import main.Stoppable;
 import main.customLogger.CustomLogger;
 import main.building.Building;
 import main.Direction;
@@ -9,11 +10,11 @@ import main.button.Button;
 
 import java.util.*;
 
-public class Elevator implements Runnable {
+public class Elevator implements Stoppable {
 
     private final CustomLogger logger;
 
-    private boolean shouldRun = true;
+    private volatile boolean shouldRun = true;
     private boolean isSleeping = false;
 
     private final Building building;
@@ -203,7 +204,8 @@ public class Elevator implements Runnable {
         }
     }
 
-    public void stopThread() {
+    @Override
+    public void stop() {
         shouldRun = false;
     }
 

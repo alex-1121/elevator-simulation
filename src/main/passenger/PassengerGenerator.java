@@ -1,5 +1,6 @@
 package main.passenger;
 
+import main.Stoppable;
 import main.building.Building;
 import main.building.Floor;
 import main.customLogger.CustomLogger;
@@ -8,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class PassengerGenerator implements Runnable {
+public class PassengerGenerator implements Stoppable {
 
-    private boolean shouldRun = true;
+    private volatile boolean shouldRun = true;
     private static final long GENERATION_INTERVAL = 200;
 
     private final Building building;
@@ -90,7 +91,8 @@ public class PassengerGenerator implements Runnable {
         }
     }
 
-    public void stopThread() {
+    @Override
+    public void stop() {
         shouldRun = false;
     }
 }
