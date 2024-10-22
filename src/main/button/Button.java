@@ -32,8 +32,7 @@ public abstract class Button {
 
     public static String buttonsToString(Set<? extends Button> buttonList) {
         return buttonList.stream()
-                .map(Button::getFloorNumber)
-                .map(String::valueOf)
-                .collect(Collectors.joining(", "));
+                .map(b -> String.format("%s - %s", b.getFloorNumber(), b.isPressed()))
+                .collect(Collectors.joining(",\n"));
     }
 }

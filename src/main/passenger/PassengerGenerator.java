@@ -73,6 +73,10 @@ public class PassengerGenerator implements Stoppable {
         // TODO: Implement this method
     }
 
+    public void createPassenger(int startingFloorNumber) {
+        createPassenger(startingFloorNumber, getRandomFloorNumberExcept(startingFloorNumber));
+    }
+
     public void createPassenger(int startingFloorNumber, int destinationFloorNumber) {
         Floor floor = building.getFloorByNumber(startingFloorNumber);
         Passenger passenger = new Passenger(destinationFloorNumber);

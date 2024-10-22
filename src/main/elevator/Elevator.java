@@ -24,6 +24,7 @@ public class Elevator implements Stoppable {
     private final Building building;
     private final Integer capacity;
     private final List<Passenger> passengers = new ArrayList<>();
+    private final PassengerManager passengerManager;
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
     private final AtomicInteger currentFloorNumber;
@@ -36,6 +37,7 @@ public class Elevator implements Stoppable {
         this.building = building;
         this.capacity = capacity;
         this.currentFloorNumber = new AtomicInteger(currentFloorNumber);
+        this.passengerManager = new PassengerManager(logger);
         synchronized (elevatorButtons) {
             building.getFloors().forEach(floor -> elevatorButtons.add(new ElevatorButton(floor.floorNumber)));
         }
@@ -87,39 +89,8 @@ public class Elevator implements Stoppable {
 
     private void loadAndUnloadPassengers() {
         Floor currentFloor = this.building.getFloorByNumber(currentFloorNumber.get());
-        unloadPassengers(currentFloor);
-        loadPassengers(currentFloor);
-    }
-
-    private void unloadPassengers(Floor currentFloor) {
-        ArrayList<Passenger> passengersToUnload = new ArrayList<>();
-        this.passengers.stream()
-                .filter(passenger -> passenger.destinationFloorNumber.equals(currentFloor.floorNumber))
-                .forEach(passengersToUnload::add);
-        if (passengersToUnload.isEmpty()) {
-            return;
-        }
-        logger.logElevator(passengersToUnload.size() + " passengers arrived at their destination floor " + destinationFloorNumber);
-        passengers.removeAll(passengersToUnload);
-    }
-
-    private void loadPassengers(Floor currentFloor) {
-        int newPassengers = 0;
-        Collection<Passenger> waitingPassengers = currentFloor.getWaitingPassengers();
-        synchronized (waitingPassengers) {
-            ArrayList<Passenger> passengersToLoad = new ArrayList<>();
-            for (Passenger passenger : waitingPassengers) {
-                if (this.passengers.size() + passengersToLoad.size() >= this.capacity) {
-                    break;
-                }
-                passengersToLoad.add(passenger);
-                newPassengers++;
-                pressElevatorButton(passenger.destinationFloorNumber);
-            }
-            waitingPassengers.removeAll(passengersToLoad);
-            this.passengers.addAll(passengersToLoad);
-        }
-        logger.logElevator(String.format("New passengers: %s, total passengers: %s/%s", newPassengers, this.passengers.size(), capacity));
+        passengerManager.unloadPassengers(currentFloor, passengers);
+        passengerManager.loadPassengers(currentFloor, this);
     }
 
     private void pressElevatorButton(Integer destinationFloorNumber) {
@@ -160,6 +131,14 @@ public class Elevator implements Stoppable {
 
     public Integer getCurrentFloorNumber() {
         return currentFloorNumber.get();
+    }
+
+    public Integer getElevatorCapacity() {
+        return capacity;
+    }
+
+    public List<Passenger> getPassengers() {
+        return passengers;
     }
 
     public void setMovementDirection(Direction movementDirection) {
