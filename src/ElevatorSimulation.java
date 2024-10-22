@@ -33,6 +33,7 @@ public class ElevatorSimulation {
 
         logger.logMain("All threads started");
 
+        //noinspection resource
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> {
             boolean isEveryThreadAlive = threads.stream().allMatch(Thread::isAlive);
