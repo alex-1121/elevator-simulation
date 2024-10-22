@@ -28,7 +28,13 @@ public class ElevatorSimulation {
                 new PassengerGenerator(building, logger)
         );
 
-        List<Thread> threads = runnables.stream().map(Thread::new).toList();
+        List<Thread> threads = runnables.stream()
+                .map(runnable -> {
+                    Thread t = new Thread(runnable);
+                    logger.logMain(String.format("%s: %s", t.getName(), runnable.getClass().getSimpleName()));
+                    return t;
+                }).toList();
+
         threads.forEach(Thread::start);
 
         logger.logMain("All threads started");
