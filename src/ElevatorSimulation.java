@@ -33,23 +33,19 @@ public class ElevatorSimulation {
 
         logger.logMain("All threads started");
 
-        try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor()) {
-            scheduler.scheduleAtFixedRate(() -> {
-                boolean isEveryThreadAlive = threads.stream().allMatch(Thread::isAlive);
-                if (!isEveryThreadAlive) {
-                    logger.logMain("Stopping all threads");
-                    runnables.forEach(Stoppable::stop);
-                    scheduler.shutdown();
-
-                }
-            }, 0, 1, TimeUnit.SECONDS);
-
-            // TODO This block of code was originally supposed to be outside of try block.
-            //  For some strange reason, scheduled task only works once if this code is not here.
-            for (Thread thread : threads) {
-                thread.join();
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            boolean isEveryThreadAlive = threads.stream().allMatch(Thread::isAlive);
+            if (!isEveryThreadAlive) {
+                logger.logMain("Stopping all threads");
+                runnables.forEach(Stoppable::stop);
+                scheduler.close();
             }
-            logger.logMain("All threads stopped");
+        }, 0, 1, TimeUnit.SECONDS);
+
+        for (Thread thread : threads) {
+            thread.join();
         }
+        logger.logMain("All threads stopped");
     }
 }
