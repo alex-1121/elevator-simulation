@@ -9,6 +9,8 @@ import main.passenger.Passenger;
 import main.button.Button;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Elevator implements Stoppable {
 
@@ -17,23 +19,23 @@ public class Elevator implements Stoppable {
     private final CustomLogger logger;
 
     private volatile boolean shouldRun = true;
-    private boolean isSleeping = false;
+    private volatile boolean isSleeping = false;
 
     private final Building building;
     private final Integer capacity;
     private final List<Passenger> passengers = new ArrayList<>();
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
-    private Integer destinationFloorNumber;
-    private boolean isStopped = true;
-    private Integer currentFloorNumber;
+    private final AtomicInteger currentFloorNumber;
+    private final AtomicBoolean elevatorIsStopped = new AtomicBoolean(true);
     private final ElevatorDirection movementDirection = new ElevatorDirection(Direction.UP);
+    private Integer destinationFloorNumber;
 
     public Elevator(Integer capacity, Building building, Integer currentFloorNumber, CustomLogger logger) {
         this.logger = logger;
         this.building = building;
         this.capacity = capacity;
-        this.currentFloorNumber = currentFloorNumber;
+        this.currentFloorNumber = new AtomicInteger(currentFloorNumber);
         synchronized (elevatorButtons) {
             building.getFloors().forEach(floor -> elevatorButtons.add(new ElevatorButton(floor.floorNumber)));
         }
@@ -46,13 +48,11 @@ public class Elevator implements Stoppable {
             logger.logElevator("Already at destination floor: " + this.destinationFloorNumber);
         } else {
             logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
-            synchronized (movementDirection) {
-                while (!atDestination()) {
-                    isStopped = false;
-                    makeStep();
-                }
-                isStopped = true;
+            while (!atDestination()) {
+                elevatorIsStopped.set(false);
+                makeStep();
             }
+            elevatorIsStopped.set(true);
         }
         releaseButtons();
         loadAndUnloadPassengers();
@@ -60,11 +60,11 @@ public class Elevator implements Stoppable {
 
     private void makeStep() {
         simulateElevatorMovingTime();
-        if (currentFloorNumber < this.destinationFloorNumber) {
-            currentFloorNumber++;
+        if (currentFloorNumber.get() < this.destinationFloorNumber) {
+            currentFloorNumber.incrementAndGet();
             movementDirection.setDirection(Direction.UP);
         } else {
-            currentFloorNumber--;
+            currentFloorNumber.decrementAndGet();
             movementDirection.setDirection(Direction.DOWN);
         }
         logger.logElevator(String.format("Moving %s, %s/%s", movementDirection, currentFloorNumber, building.getFloorCount()));
@@ -73,20 +73,20 @@ public class Elevator implements Stoppable {
     private void releaseButtons() {
         synchronized (elevatorButtons) {
             elevatorButtons.stream()
-                    .filter(button -> button.getFloorNumber().equals(currentFloorNumber))
+                    .filter(button -> button.getFloorNumber().equals(currentFloorNumber.get()))
                     .findFirst()
                     .ifPresent(Button::release);
         }
         synchronized (building.getFloors()) {
             building.getFloors().stream()
-                    .filter(floor -> floor.floorNumber.equals(currentFloorNumber))
+                    .filter(floor -> floor.floorNumber.equals(currentFloorNumber.get()))
                     .findFirst()
                     .ifPresent(floor -> floor.getButton().release());
         }
     }
 
     private void loadAndUnloadPassengers() {
-        Floor currentFloor = this.building.getFloorByNumber(this.currentFloorNumber);
+        Floor currentFloor = this.building.getFloorByNumber(currentFloorNumber.get());
         unloadPassengers(currentFloor);
         loadPassengers(currentFloor);
     }
@@ -147,7 +147,7 @@ public class Elevator implements Stoppable {
     }
 
     public boolean atDestination() {
-        return currentFloorNumber.equals(destinationFloorNumber);
+        return Objects.equals(currentFloorNumber.get(), destinationFloorNumber);
     }
 
     public synchronized Collection<ElevatorButton> getElevatorButtons() {
@@ -155,23 +155,21 @@ public class Elevator implements Stoppable {
     }
 
     public boolean isStopped() {
-        return isStopped;
+        return elevatorIsStopped.get();
     }
 
     public Integer getCurrentFloorNumber() {
-        return currentFloorNumber;
+        return currentFloorNumber.get();
     }
 
     public void setMovementDirection(Direction movementDirection) {
-        synchronized (this.movementDirection) {
+        if (isStopped()) {
             this.movementDirection.setDirection(movementDirection);
         }
     }
 
     public Direction getMovementDirection() {
-        synchronized (this.movementDirection) {
-            return this.movementDirection.getDirection();
-        }
+        return this.movementDirection.getDirection();
     }
 
     public void wakeUp() {

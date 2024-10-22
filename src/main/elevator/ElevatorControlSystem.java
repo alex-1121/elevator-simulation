@@ -38,7 +38,7 @@ public class ElevatorControlSystem implements Stoppable {
             return;
         }
 
-        if (elevator.isStopped() && !isMoreDestinationsOnTheWay()) {
+        if (!isMoreDestinationsOnTheWay()) {
             toggleElevatorMovementDirection();
         }
 

@@ -13,11 +13,11 @@ import java.util.concurrent.TimeUnit;
 
 public class ElevatorSimulation {
 
+    private static final int NUMBER_OF_FLOORS = 5;
+    private static final int ELEVATOR_CAPACITY = 6;
     private static final CustomLogger logger = new CustomLogger();
 
     public static void main(String[] args) throws InterruptedException {
-        final int NUMBER_OF_FLOORS = 5;
-        final int ELEVATOR_CAPACITY = 6;
 
         Building building = new Building(NUMBER_OF_FLOORS);
         Elevator elevator = new Elevator(ELEVATOR_CAPACITY, building, 3, logger);
