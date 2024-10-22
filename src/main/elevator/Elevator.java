@@ -12,6 +12,8 @@ import java.util.*;
 
 public class Elevator implements Stoppable {
 
+    private static final Integer TIME_TO_MOVE_BETWEEN_FLOORS = 500;
+
     private final CustomLogger logger;
 
     private volatile boolean shouldRun = true;
@@ -20,7 +22,6 @@ public class Elevator implements Stoppable {
     private final Building building;
     private final Integer capacity;
     private final List<Passenger> passengers = new ArrayList<>();
-    private static final Integer TIME_TO_MOVE_BETWEEN_FLOORS = 500;
 
     private final Collection<ElevatorButton> elevatorButtons = Collections.synchronizedCollection(new ArrayList<>());
     private Integer destinationFloorNumber;
@@ -66,7 +67,7 @@ public class Elevator implements Stoppable {
             currentFloorNumber--;
             movementDirection.setDirection(Direction.DOWN);
         }
-        logger.logElevator("Moving " + movementDirection + ", " + currentFloorNumber + "/" + building.getFloorCount());
+        logger.logElevator(String.format("Moving %s, %s/%s", movementDirection, currentFloorNumber, building.getFloorCount()));
     }
 
     private void releaseButtons() {
@@ -118,7 +119,7 @@ public class Elevator implements Stoppable {
             waitingPassengers.removeAll(passengersToLoad);
             this.passengers.addAll(passengersToLoad);
         }
-        logger.logElevator("New passengers: " + newPassengers + ", total passengers: " + this.passengers.size() + "/" + capacity);
+        logger.logElevator(String.format("New passengers: %s, total passengers: %s/%s", newPassengers, this.passengers.size(), capacity));
     }
 
     private void pressElevatorButton(Integer destinationFloorNumber) {
@@ -182,7 +183,7 @@ public class Elevator implements Stoppable {
 
     @Override
     public void run() {
-        logger.logElevator("Started at floor " + currentFloorNumber);
+        logger.logElevator(String.format("Started at floor %s", currentFloorNumber));
         while (shouldRun) {
             waitIfNeeded();
             goToDestinationFloor();

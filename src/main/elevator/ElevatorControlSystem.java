@@ -13,9 +13,10 @@ import java.util.stream.Collectors;
 
 public class ElevatorControlSystem implements Stoppable {
 
+    private static final long POLLING_DELAY = 100;
+
     private final CustomLogger logger;
 
-    private static final long POLLING_DELAY = 100;
     private volatile boolean shouldRun = true;
 
     private final Elevator elevator;

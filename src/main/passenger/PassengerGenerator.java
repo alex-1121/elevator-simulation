@@ -10,9 +10,9 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class PassengerGenerator implements Stoppable {
+    private static final long GENERATION_INTERVAL = 200;
 
     private volatile boolean shouldRun = true;
-    private static final long GENERATION_INTERVAL = 200;
 
     private final Building building;
     private final CustomLogger logger;
