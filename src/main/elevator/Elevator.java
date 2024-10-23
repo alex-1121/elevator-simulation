@@ -43,33 +43,57 @@ public class Elevator implements Stoppable {
         }
     }
 
-    private void goToDestinationFloor() {
+    private void goToDestinationFloor(Integer destinationFloorNumber) {
         logger.logPassengers("Passengers: " + passengers);
 
-        if (atDestination()) {
-            logger.logElevator("Already at destination floor: " + this.destinationFloorNumber);
+        if (atDestination(destinationFloorNumber)) {
+            openDoors(destinationFloorNumber);
         } else {
-            logger.logElevator("Moving to destination floor: " + this.destinationFloorNumber);
-            while (!atDestination()) {
-                elevatorIsStopped.set(false);
-                makeStep();
-            }
-            elevatorIsStopped.set(true);
+            moveTo(destinationFloorNumber);
         }
         releaseButtons();
         loadAndUnloadPassengers();
     }
 
-    private void makeStep() {
+    private void openDoors(Integer destinationFloorNumber) {
+        logger.logElevator("Already at destination floor: " + destinationFloorNumber);
+    }
+
+    private void moveTo(Integer destinationFloorNumber) {
+        logger.logElevator("Moving to destination floor: " + destinationFloorNumber);
+        elevatorIsStopped.set(false);
+        while (!atDestination(destinationFloorNumber)) {
+            if (hasNewDestinationOnTheWay(destinationFloorNumber)) {
+                logger.logElevator(String.format("Destination overridden: %s -> %s", destinationFloorNumber, this.destinationFloorNumber));
+                destinationFloorNumber = this.destinationFloorNumber;
+            }
+            System.out.printf("before makeStep(): atDestination() - %s, current - %s, dest - %s\n", atDestination(destinationFloorNumber), currentFloorNumber.get(), destinationFloorNumber);
+            makeStepTo(destinationFloorNumber);
+            logger.logElevator(String.format("Moving %s, %s/%s", movementDirection, currentFloorNumber, building.getFloorCount()));
+        }
+        elevatorIsStopped.set(true);
+    }
+
+    private boolean hasNewDestinationOnTheWay(int dest) {
+        return !this.destinationFloorNumber.equals(dest)
+                && isIntermediateDestination(currentFloorNumber.get(), dest, this.destinationFloorNumber);
+    }
+
+    private boolean isIntermediateDestination(int floor, int oldDest, int newDest) {
+        return floor < oldDest
+                ? newDest > floor && newDest < oldDest
+                : newDest < floor && newDest > oldDest;
+    }
+
+    private void makeStepTo(Integer destinationFloorNumber) {
         simulateElevatorMovingTime();
-        if (currentFloorNumber.get() < this.destinationFloorNumber) {
+        if (currentFloorNumber.get() < destinationFloorNumber) {
             currentFloorNumber.incrementAndGet();
             movementDirection.setDirection(Direction.UP);
         } else {
             currentFloorNumber.decrementAndGet();
             movementDirection.setDirection(Direction.DOWN);
         }
-        logger.logElevator(String.format("Moving %s, %s/%s", movementDirection, currentFloorNumber, building.getFloorCount()));
     }
 
     private void releaseButtons() {
@@ -93,20 +117,20 @@ public class Elevator implements Stoppable {
         passengerManager.loadPassengers(currentFloor, this);
     }
 
-    private void pressElevatorButton(Integer destinationFloorNumber) {
-        synchronized (elevatorButtons) {
-            elevatorButtons.stream()
-                    .filter(button -> button.getFloorNumber().equals(destinationFloorNumber))
-                    .findFirst().ifPresent(Button::press);
-        }
-    }
-
     private void simulateElevatorMovingTime() {
         try {
             Thread.sleep(TIME_TO_MOVE_BETWEEN_FLOORS);
         } catch (InterruptedException e) {
             logger.logError(e);
         }
+    }
+
+    private boolean atDestination(Integer destinationFloorNumber) {
+        return Objects.equals(currentFloorNumber.get(), destinationFloorNumber);
+    }
+
+    private boolean isStopped() {
+        return elevatorIsStopped.get();
     }
 
     public Integer getDestinationFloorNumber() {
@@ -117,16 +141,8 @@ public class Elevator implements Stoppable {
         this.destinationFloorNumber = destinationFloorNumber;
     }
 
-    public boolean atDestination() {
-        return Objects.equals(currentFloorNumber.get(), destinationFloorNumber);
-    }
-
     public synchronized Collection<ElevatorButton> getElevatorButtons() {
         return this.elevatorButtons;
-    }
-
-    public boolean isStopped() {
-        return elevatorIsStopped.get();
     }
 
     public Integer getCurrentFloorNumber() {
@@ -163,13 +179,14 @@ public class Elevator implements Stoppable {
         logger.logElevator(String.format("Started at floor %s", currentFloorNumber));
         while (shouldRun) {
             waitIfNeeded();
-            goToDestinationFloor();
+            Integer lockedDest = destinationFloorNumber;
+            goToDestinationFloor(lockedDest);
         }
         logger.logElevator("Stopped");
     }
 
     private void waitIfNeeded() {
-        if (atDestination() || destinationFloorNumber == null) {
+        if (atDestination(destinationFloorNumber) || destinationFloorNumber == null) {
             try {
                 logger.logElevator("Waiting for calls");
                 synchronized (this) {
