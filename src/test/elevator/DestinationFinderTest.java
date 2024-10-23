@@ -1,4 +1,4 @@
-package test.elevator;
+package elevator;
 
 import main.Direction;
 import main.building.Building;

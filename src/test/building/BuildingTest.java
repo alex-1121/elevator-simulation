@@ -1,4 +1,4 @@
-package test.building;
+package building;
 
 import main.building.Building;
 import main.building.Floor;
