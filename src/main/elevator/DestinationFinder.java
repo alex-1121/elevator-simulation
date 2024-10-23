@@ -28,7 +28,6 @@ public class DestinationFinder {
                 .min(Button.buttonComparator)
                 .map(Button::getFloorNumber);
 
-
         return nextDestination.isPresent() ? nextDestination :
                 destinationFloorNumbers.stream()
                         .filter(floorNumber -> floorNumber >= elevator.getCurrentFloorNumber())

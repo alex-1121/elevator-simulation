@@ -30,9 +30,8 @@ public abstract class Button {
         return floorNumber;
     }
 
-    public static String buttonsToString(Set<? extends Button> buttonList) {
-        return buttonList.stream()
-                .map(b -> String.format("%s - %s", b.getFloorNumber(), b.isPressed()))
-                .collect(Collectors.joining(",\n"));
+    @Override
+    public String toString() {
+        return String.format("%s - %s", getFloorNumber(), isPressed);
     }
 }

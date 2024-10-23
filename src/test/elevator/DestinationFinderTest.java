@@ -4,10 +4,7 @@ import main.Direction;
 import main.building.Building;
 import main.button.Button;
 import main.customLogger.CustomLogger;
-import main.elevator.ButtonReader;
-import main.elevator.DestinationFinder;
-import main.elevator.Elevator;
-import main.elevator.ElevatorButton;
+import main.elevator.*;
 import main.passenger.PassengerGenerator;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +18,7 @@ class DestinationFinderTest {
 
     DestinationFinder destinationFinder = new DestinationFinder();
     ButtonReader buttonReader = new ButtonReader();
+    PassengerManager passengerManager = new PassengerManager(logger);
 
     @Test
     void isMoreDestinationsOnTheWay_findsDestinationsAbove() {
@@ -49,16 +47,16 @@ class DestinationFinderTest {
 
     @Test
     void lookUp_findsDestinationOnCurrentFloor() {
-        Building building = createBuildingWithPassengerOnFloor(3);
+        //TODO all cases (lower, higher, same floor) for both parts of lookUp
+        Building building = createBuilding();
 
-        Elevator elevator = createElevator(3, building);
-        Set<Integer> destinationFloorNumbers = destinationFinder.getDestinationFloorNumbers(
-                buttonReader.detectPressedElevatorButtons(elevator),
-                buttonReader.detectPressedFloorButtons(building)
-        );
+        Elevator elevator = createElevatorWithPassenger(3, 3, building);
+
         Set<ElevatorButton> pressedElevatorButtons = new TreeSet<>(Button.buttonComparator);
         pressedElevatorButtons.addAll(buttonReader.detectPressedElevatorButtons(elevator));
 
+        // Passing empty set, to make sure that result is based on ElevatorButtons
+        Set<Integer> destinationFloorNumbers = new TreeSet<>();
         assertEquals(3, destinationFinder.lookUp(elevator, pressedElevatorButtons, destinationFloorNumbers).orElseThrow());
     }
 
@@ -90,7 +88,6 @@ class DestinationFinderTest {
         assertEquals(Optional.empty(), destinationFinder.lookUp(elevator, pressedElevatorButtons, destinationFloorNumbers));
     }
 
-    //TODO test both parts of lookUp
 
     @Test
     void lookBelow_findsDestinationOnFloorBelow() {
@@ -150,6 +147,14 @@ class DestinationFinderTest {
 
     Elevator createElevator(Integer initialFloorNumber) {
         return new Elevator(6, createBuilding(), initialFloorNumber, logger);
+    }
+
+    Elevator createElevatorWithPassenger(Integer elevatorFloorNumber, Integer passengerDestination, Building building) {
+        Elevator newElevator = new Elevator(6, building, elevatorFloorNumber, logger);
+        PassengerGenerator passengerGenerator = new PassengerGenerator(building, logger);
+        passengerGenerator.createPassenger(elevatorFloorNumber, passengerDestination);
+        passengerManager.loadPassengers(building.getFloorByNumber(elevatorFloorNumber), newElevator);
+        return newElevator;
     }
 
     Elevator createElevator(Integer initialFloorNumber, Building building) {
