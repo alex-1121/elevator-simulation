@@ -24,20 +24,22 @@ public class DestinationFinder {
     // Else find the highest floor button pressed
     public Optional<Integer> lookUp(Elevator elevator, Set<ElevatorButton> pressedElevatorButtons, Set<Integer> destinationFloorNumbers) {
         Optional<Integer> nextDestination = pressedElevatorButtons.stream()
-                .filter(button -> button.getFloorNumber() > elevator.getCurrentFloorNumber())
+                .filter(button -> button.getFloorNumber() >= elevator.getCurrentFloorNumber())
                 .min(Button.buttonComparator)
                 .map(Button::getFloorNumber);
 
-        return Optional.of(nextDestination.orElseGet(() -> destinationFloorNumbers.stream()
-                .filter(floorNumber -> floorNumber > elevator.getCurrentFloorNumber())
-                .max(Integer::compareTo).orElse(elevator.getCurrentFloorNumber())));
+
+        return nextDestination.isPresent() ? nextDestination :
+                destinationFloorNumbers.stream()
+                        .filter(floorNumber -> floorNumber >= elevator.getCurrentFloorNumber())
+                        .max(Integer::compareTo);
     }
 
     // Find first button pressed below current floor
     public Optional<Integer> lookBelow(Elevator elevator, Set<Integer> destinationFloorNumbers) {
-        return Optional.of(destinationFloorNumbers.stream()
-                .filter(floorNumber -> floorNumber < elevator.getCurrentFloorNumber())
-                .max(Integer::compareTo).orElse(elevator.getCurrentFloorNumber()));
+        return destinationFloorNumbers.stream()
+                .filter(floorNumber -> floorNumber <= elevator.getCurrentFloorNumber())
+                .max(Integer::compareTo);
     }
 
     public Set<Integer> getDestinationFloorNumbers(Set<ElevatorButton> pressedElevatorButtons, Set<FloorButton> pressedFloorButtons) {

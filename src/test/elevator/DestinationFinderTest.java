@@ -87,7 +87,6 @@ class DestinationFinderTest {
                 buttonReader.detectPressedFloorButtons(building)
         );
 
-        // TODO returns current floor, fix this
         assertEquals(Optional.empty(), destinationFinder.lookUp(elevator, pressedElevatorButtons, destinationFloorNumbers));
     }
 
@@ -119,8 +118,22 @@ class DestinationFinderTest {
                 buttonReader.detectPressedFloorButtons(building)
         );
 
-        // TODO returns current floor, fix this
         assertFalse(destinationFinder.lookBelow(elevator, destinationFloorNumbers).isPresent());
+    }
+
+    @Test
+    void lookBelow_findsDestinationOnCurrentFloor() {
+        Building building = createBuildingWithPassengerOnFloor(5);
+
+        Elevator elevator = createElevator(5, building);
+        Set<ElevatorButton> pressedElevatorButtons = buttonReader.detectPressedElevatorButtons(elevator);
+        Set<Integer> destinationFloorNumbers = destinationFinder.getDestinationFloorNumbers(
+                pressedElevatorButtons,
+                buttonReader.detectPressedFloorButtons(building)
+        );
+
+        assertTrue(destinationFinder.lookBelow(elevator, destinationFloorNumbers).isPresent());
+        assertEquals(5, destinationFinder.lookBelow(elevator, destinationFloorNumbers).get());
     }
 
     Building createBuildingWithPassengerOnFloor(Integer floorNumber) {
