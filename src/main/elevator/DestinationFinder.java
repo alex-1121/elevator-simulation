@@ -14,9 +14,9 @@ public class DestinationFinder {
     public boolean isMoreDestinationsOnTheWay(Elevator elevator, Set<Integer> destinationFloorNumbers) {
         Integer currentFloor = elevator.getCurrentFloorNumber();
         if (elevator.getMovementDirection() == Direction.UP) {
-            return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber >= currentFloor);
+            return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber > currentFloor);
         } else {
-            return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber <= currentFloor);
+            return destinationFloorNumbers.stream().anyMatch(floorNumber -> floorNumber < currentFloor);
         }
     }
 

@@ -41,20 +41,10 @@ class DestinationFinderTest {
 
     @Test
     void isMoreDestinationsOnTheWay_returnsFalseIfNoValidDestinations() {
-        Elevator elevator = createElevator(3);
+        Elevator elevator = createElevator(3); // Default is direction UP
 
         assertFalse(destinationFinder.isMoreDestinationsOnTheWay(elevator, new TreeSet<>()));
         assertFalse(destinationFinder.isMoreDestinationsOnTheWay(elevator, new TreeSet<>(Arrays.asList(1, 2))));
-    }
-
-    @Test
-    void isMoreDestinationsOnTheWay_findsDestinationOnCurrentFloor() {
-        Elevator elevator = createElevator(3);
-
-        assertTrue(destinationFinder.isMoreDestinationsOnTheWay(elevator, new TreeSet<>(Arrays.asList(2, 3))));
-
-        elevator.setMovementDirection(Direction.DOWN);
-        assertTrue(destinationFinder.isMoreDestinationsOnTheWay(elevator, new TreeSet<>(Arrays.asList(3, 4))));
     }
 
     @Test
