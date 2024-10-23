@@ -67,7 +67,6 @@ public class Elevator implements Stoppable {
                 logger.logElevator(String.format("Destination overridden: %s -> %s", destinationFloorNumber, this.destinationFloorNumber));
                 destinationFloorNumber = this.destinationFloorNumber;
             }
-            System.out.printf("before makeStep(): atDestination() - %s, current - %s, dest - %s\n", atDestination(destinationFloorNumber), currentFloorNumber.get(), destinationFloorNumber);
             makeStepTo(destinationFloorNumber);
             logger.logElevator(String.format("Moving %s, %s/%s", movementDirection, currentFloorNumber, building.getFloorCount()));
         }
