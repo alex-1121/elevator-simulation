@@ -85,7 +85,6 @@ public class Elevator implements Stoppable {
     }
 
     private void makeStepTo(Integer destinationFloorNumber) {
-        simulateElevatorMovingTime();
         if (currentFloorNumber.get() < destinationFloorNumber) {
             currentFloorNumber.incrementAndGet();
             movementDirection.setDirection(Direction.UP);
@@ -93,6 +92,7 @@ public class Elevator implements Stoppable {
             currentFloorNumber.decrementAndGet();
             movementDirection.setDirection(Direction.DOWN);
         }
+        simulateElevatorMovingTime();
     }
 
     private void releaseButtons() {
